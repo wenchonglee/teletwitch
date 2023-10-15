@@ -8,21 +8,20 @@ ffmpeg.setFfmpegPath(path);
 const exec = util.promisify(baseExec);
 
 // TODO: determine if the file is animated and longer than 3seconds
-const resizeWebp = async (file: File) => {
-  const tempName = Date.now().toString();
+const resizeWebp = async (tempName: string, emote: ArrayBuffer) => {
+  const fileName = `${tempName}.webp`;
 
   // * it seems this already handles rectangles??
   // resize the image to 512
-  await sharp(await file.arrayBuffer(), { animated: true })
-    .resize(512)
-    .toFile(`${tempName}.webp`);
+  await sharp(emote, { animated: true }).resize(512).toFile(fileName);
+  return fileName;
 };
 
 // TODO: tmp folder must exist
 // TODO: to handle linux
-const convertWebpToFrames = async (fileName: string) => {
+const convertWebpToFrames = async (prefix: string, webpFileName: string) => {
   // slice the animation into png files
-  const { stdout, stderr } = await exec(`"bin/anim_dump.exe" -folder tmp -prefix ${fileName}_ ${fileName}.webp`);
+  const { stdout, stderr } = await exec(`"bin/anim_dump.exe" -folder tmp -prefix ${prefix}_ ${webpFileName}`);
 };
 
 // TODO: resulting size must be below 256KB

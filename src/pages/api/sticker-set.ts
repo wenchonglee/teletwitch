@@ -2,23 +2,27 @@ import type { APIRoute } from "astro";
 
 import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "@utils/webp";
 import { uploadStickerFile } from "@utils/telegram";
+import { get7tvEmote } from "@utils/7tv";
 
 /**
  * Creates a new sticker-set
  *
  * Accepts:
- * - file
+ * - emoteUrl
  * - stickerSetName
  * -
  */
 export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData();
-  const file = form.get("webp") as File;
+  const emoteUrl = form.get("emoteUrl") as string;
 
   const tempName = Date.now().toString();
 
-  await resizeWebp(file);
-  await convertWebpToFrames(tempName);
+  const emote = await get7tvEmote(emoteUrl);
+  const resizedWebpFileName = await resizeWebp(tempName, emote);
+  // todo: if not animated, stop here
+
+  await convertWebpToFrames(tempName, resizedWebpFileName);
   await convertFramesToWebm(tempName);
   await cleanup();
 

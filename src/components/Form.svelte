@@ -1,4 +1,5 @@
 <script lang="ts">
+  import EmoteGrid7tv from "./EmoteGrid7tv.svelte";
   import Input from "./Input.svelte";
   import Label from "./Label.svelte";
 
@@ -18,7 +19,7 @@
 <form on:submit|preventDefault={submit} class="form">
   <div class="grid w-full max-w-sm items-center gap-1.5">
     <Label for="userId">User ID</Label>
-    <Input required name="userId" autocomplete="off" value="391584629" />
+    <Input required name="userId" autocomplete="off" value={import.meta.env["PUBLIC_USER_ID"]} />
   </div>
 
   <div class="grid w-full max-w-sm items-center gap-1.5">
@@ -33,9 +34,7 @@
 
   <button> Send</button>
 
-  {#if responseMessage}
-    <p>{responseMessage}</p>
-  {/if}
+  <EmoteGrid7tv />
 </form>
 
 <style>
