@@ -7,12 +7,13 @@
 
   async function submit(e: SubmitEvent) {
     const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const response = await fetch("/api/webp", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await response.json();
-    responseMessage = data.message;
+    console.log(formData.get("stickerFormat"));
+    // const response = await fetch("/api/webp", {
+    //   method: "POST",
+    //   body: formData,
+    // });
+    // const data = await response.json();
+    // responseMessage = data.message;
   }
 </script>
 
@@ -27,12 +28,17 @@
     <Input required name="stickerpackName" value="test_by_teletwitchsticker_bot" />
   </div>
 
-  <div class="grid w-full max-w-sm items-center gap-1.5">
-    <Label for="webp">File</Label>
-    <Input required type="file" name="webp" />
+  <div>
+    <input type="radio" id="animated" name="stickerFormat" value="animated" checked />
+    <label for="animated">Animated</label>
   </div>
 
-  <button> Send</button>
+  <div>
+    <input type="radio" id="static" name="stickerFormat" value="static" />
+    <label for="static">Static</label>
+  </div>
+
+  <button> Send </button>
 
   <EmoteGrid7tv />
 </form>

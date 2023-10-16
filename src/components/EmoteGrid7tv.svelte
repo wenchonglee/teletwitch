@@ -1,21 +1,40 @@
 <script lang="ts">
+  import { fetch7tvEmotes } from "./fetchEmotes";
   import { store } from "./store";
+
+  let promise = fetch7tvEmotes();
+
+  let timeoutId: ReturnType<typeof setTimeout>;
+  const debouncedInput = (query: string) => {
+    clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(function () {
+      promise = fetch7tvEmotes(query);
+    }, 300);
+  };
 </script>
 
 <div>
-  <input
-    on:change={(e) => {
-      store.filter(e.currentTarget.value);
-    }}
-  />
-
+  <input on:input={(e) => debouncedInput(e.currentTarget.value)} />
+  <span>{$store.stickerUrl}</span>
   <div class="emote-grid">
-    {#each $store?.data?.items as { id, name, host }, i}
-      <div class="emote-container" data-selected={String(false)}>
-        <img src={`https:${host.url}/2x.webp`} alt={name} title={name} />
-        <span>{name}</span>
-      </div>
-    {/each}
+    {#await promise}
+      <p>waiting...</p>
+    {:then data}
+      {#each data.emotes.items as { name, host }}
+        <button
+          type="button"
+          class="emote-container"
+          data-selected={String($store.stickerUrl === `https:${host.url}/2x.webp`)}
+          on:click={() => store.setStickerUrl(`https:${host.url}/2x.webp`)}
+        >
+          <img src={`https:${host.url}/2x.webp`} alt={name} title={name} />
+          <span>{name}</span>
+        </button>
+      {/each}
+    {:catch}
+      <p>error</p>
+    {/await}
   </div>
 </div>
 
