@@ -1,12 +1,9 @@
 @import "open-props/style";
 @import "open-props/normalize";
-@import "open-props/colors";
-@import "open-props/fonts";
-@import "open-props/sizes";
-@import "open-props/shadows";
 
 html {
-  --font-sans: "Inter";
+  --font-sans: "Inter", Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, Segoe UI, Roboto, Ubuntu, Cantarell,
+    Noto Sans, sans-serif;
 }
 @media (min-width: 1024px) {
   body {
