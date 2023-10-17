@@ -15,7 +15,7 @@
 </script>
 
 <div>
-  <input on:input={(e) => debouncedInput(e.currentTarget.value)} />
+  <input placeholder="Search" on:input={(e) => debouncedInput(e.currentTarget.value)} />
   <span>{$store.stickerUrl}</span>
   <div class="emote-grid">
     {#await promise}
@@ -32,8 +32,8 @@
           <span>{name}</span>
         </button>
       {/each}
-    {:catch}
-      <p>error</p>
+    {:catch err}
+      <p>{err}</p>
     {/await}
   </div>
 </div>
@@ -53,6 +53,7 @@
     flex-direction: column;
     align-items: center;
     cursor: pointer;
+    border: var(--border-size-2) solid transparent;
   }
 
   .emote-container:hover {
@@ -61,6 +62,7 @@
 
   .emote-container[data-selected="true"] {
     background-color: var(--surface-3);
+    border: var(--border-size-2) solid var(--orange-5);
   }
 
   .emote-container img {

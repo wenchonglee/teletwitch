@@ -2,16 +2,22 @@
   import EmoteGrid7tv from "./EmoteGrid7tv.svelte";
   import Input from "./Input.svelte";
   import Label from "./Label.svelte";
+  import { store } from "./store";
+  import { PUBLIC_USER_ID } from "$env/static/public";
 
   let responseMessage: string;
 
   async function submit(e: SubmitEvent) {
     const formData = new FormData(e.currentTarget as HTMLFormElement);
-    console.log(formData.get("stickerFormat"));
-    // const response = await fetch("/api/webp", {
-    //   method: "POST",
-    //   body: formData,
-    // });
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}, ${pair[1]}`);
+    }
+    formData.set("stickerUrl", $store.stickerUrl);
+    console.log($store.stickerUrl);
+    const response = await fetch("/api/sticker-set", {
+      method: "POST",
+      body: formData,
+    });
     // const data = await response.json();
     // responseMessage = data.message;
   }
@@ -20,7 +26,7 @@
 <form on:submit|preventDefault={submit} class="form">
   <div class="grid w-full max-w-sm items-center gap-1.5">
     <Label for="userId">User ID</Label>
-    <Input required name="userId" autocomplete="off" value={import.meta.env["PUBLIC_USER_ID"]} />
+    <Input required name="userId" autocomplete="off" value={PUBLIC_USER_ID} />
   </div>
 
   <div class="grid w-full max-w-sm items-center gap-1.5">
@@ -38,7 +44,12 @@
     <label for="static">Static</label>
   </div>
 
-  <button> Send </button>
+  <div class="grid w-full max-w-sm items-center gap-1.5">
+    <Label for="emojiList">Emote</Label>
+    <Input required name="emojiList" value="🤣" />
+  </div>
+
+  <button> Create </button>
 
   <EmoteGrid7tv />
 </form>

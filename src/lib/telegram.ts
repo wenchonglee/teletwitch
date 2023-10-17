@@ -1,8 +1,9 @@
 import { createReadStream } from "node:fs";
 import axios from "axios";
+import { BOT_TOKEN } from "$env/static/private";
 
 const tgAxios = axios.create({
-  baseURL: `https://api.telegram.org/${import.meta.env["BOT_TOKEN"]}`,
+  baseURL: `https://api.telegram.org/${BOT_TOKEN}`,
 });
 
 type UploadStickerFileResponse = {
