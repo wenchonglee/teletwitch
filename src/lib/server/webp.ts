@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import util from "node:util";
 import { exec as baseExec } from "node:child_process";
+import { rm } from "node:fs";
 import { path } from "@ffmpeg-installer/ffmpeg";
 import ffmpeg from "fluent-ffmpeg";
 
@@ -9,7 +10,7 @@ const exec = util.promisify(baseExec);
 
 // TODO: determine if the file is animated and longer than 3seconds
 const resizeWebp = async (tempName: string, emote: ArrayBuffer) => {
-  const fileName = `${tempName}.webp`;
+  const fileName = `tmp/${tempName}.webp`;
 
   // * it seems this already handles rectangles??
   // resize the image to 512
@@ -27,13 +28,16 @@ const convertWebpToFrames = async (prefix: string, webpFileName: string) => {
 // TODO: resulting size must be below 256KB
 // convert the png files to a webm file
 const convertFramesToWebm = async (fileName: string) => {
+  const webmFileName = `tmp/${fileName}.webm`;
   ffmpeg(`tmp/${fileName}_%04d.png`)
     //   .outputOptions(["-crf", "63"])
-    .save(`tmp/${fileName}.webm`);
+    .save(webmFileName);
+
+  return webmFileName;
 };
 
 // TODO: cleanup all files
-const cleanup = async () => {
+const cleanup = async (tempName: string) => {
   // resized webp
   // sliced pngs
   // created webm

@@ -1,9 +1,9 @@
 import { createReadStream } from "node:fs";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { BOT_TOKEN } from "$env/static/private";
 
 const tgAxios = axios.create({
-  baseURL: `https://api.telegram.org/${BOT_TOKEN}`,
+  baseURL: `https://api.telegram.org/bot${BOT_TOKEN}`,
 });
 
 type UploadStickerFileResponse = {
@@ -19,8 +19,6 @@ type GenericResponse = { ok: boolean; result: boolean };
 
 type UploadStickerFileParams = {
   userId: string;
-  name: string;
-  title: string;
   filePath: string;
   stickerFormat: "video" | "static";
 };
@@ -28,12 +26,12 @@ type UploadStickerFileParams = {
 const uploadStickerFile = async (params: UploadStickerFileParams) => {
   const { filePath, userId, stickerFormat } = params;
   const stream = createReadStream(filePath);
-
+  console.log("uploading", filePath, userId, stickerFormat);
   try {
     const response = await tgAxios.post<UploadStickerFileResponse>(
       "/uploadStickerFile",
       {
-        user_id: userId,
+        user_id: Number(userId),
         sticker: stream,
         sticker_format: stickerFormat,
       },
@@ -43,8 +41,9 @@ const uploadStickerFile = async (params: UploadStickerFileParams) => {
     );
 
     return response.data;
-  } catch (err) {
+  } catch (err: any) {
     // TODO: handle errors
+    console.log(err.response.data);
     return null;
   }
 };
@@ -60,9 +59,10 @@ type CreateNewStickerSetParams = {
 
 const createNewStickerSet = async (params: CreateNewStickerSetParams) => {
   const { userId, name, title, emojiList, stickerFileId, stickerFormat } = params;
+  console.log("creating new stickerset", userId, name, title, emojiList, stickerFileId, stickerFormat);
   try {
     const response = await tgAxios.post<GenericResponse>("/createNewStickerSet", {
-      user_id: userId,
+      user_id: Number(userId),
       name, // max 64 char
       title,
       stickers: [
@@ -75,9 +75,10 @@ const createNewStickerSet = async (params: CreateNewStickerSetParams) => {
     });
 
     return response.data;
-  } catch (err) {
+  } catch (err: any) {
     //   console.log(err.response.data);
     // TODO: handle errors
+    console.log(err.response.data);
     return null;
   }
 };

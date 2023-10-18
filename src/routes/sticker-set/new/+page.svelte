@@ -1,7 +1,5 @@
 <script lang="ts">
   import EmoteGrid7tv from "./EmoteGrid7tv.svelte";
-  import Input from "./Input.svelte";
-  import Label from "./Label.svelte";
   import { store } from "./store";
   import { PUBLIC_USER_ID } from "$env/static/public";
 
@@ -25,18 +23,18 @@
 
 <form on:submit|preventDefault={submit} class="form">
   <div class="grid w-full max-w-sm items-center gap-1.5">
-    <Label for="userId">User ID</Label>
-    <Input required name="userId" autocomplete="off" value={PUBLIC_USER_ID} />
+    <label for="userId">User ID</label>
+    <input required name="userId" autocomplete="off" value={PUBLIC_USER_ID} />
   </div>
 
   <div class="grid w-full max-w-sm items-center gap-1.5">
-    <Label for="stickerpackName">Sticker pack name</Label>
-    <Input required name="stickerpackName" value="test_by_teletwitchsticker_bot" />
+    <label for="stickerSetName">Sticker pack name</label>
+    <input required name="stickerSetName" value="test4_by_teletwitchsticker_bot" />
   </div>
 
   <div>
-    <input type="radio" id="animated" name="stickerFormat" value="animated" checked />
-    <label for="animated">Animated</label>
+    <input type="radio" id="video" name="stickerFormat" value="video" checked />
+    <label for="video">Video</label>
   </div>
 
   <div>
@@ -45,8 +43,8 @@
   </div>
 
   <div class="grid w-full max-w-sm items-center gap-1.5">
-    <Label for="emojiList">Emote</Label>
-    <Input required name="emojiList" value="🤣" />
+    <label for="emojiList">Emote</label>
+    <input required name="emojiList" value="🤣" />
   </div>
 
   <button> Create </button>
