@@ -4,10 +4,15 @@ import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$
 import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
 import { get7tvEmote } from "$lib/server/7tv";
 import { readdirSync, statSync } from "node:fs";
+import type { Config } from "@sveltejs/adapter-vercel";
 
 function delay(ms: number): Promise<void> {
   return new Promise((res) => setTimeout(res, ms));
 }
+
+export const config: Config = {
+  runtime: "edge",
+};
 
 export function GET({ url }) {
   const o: Record<string, string[]> = {};
@@ -29,26 +34,26 @@ export function GET({ url }) {
   // const fileList = readdirSync("./");
   // const fileList2 = readdirSync("./vercel");
   // const fileList3 = readdirSync("/vercel");
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      for (const file of fileList) {
-        controller.enqueue(encoder.encode(file) + " ");
-        await delay(500);
-      }
-      // for (let i = 0; i < 20; i++) {
-      //   controller.enqueue(encoder.encode("hello"));
-      //   await delay(1000);
-      // }
-      controller.close();
-    },
-  });
+  // const encoder = new TextEncoder();
+  // const readable = new ReadableStream({
+  //   async start(controller) {
+  //     for (const file of fileList) {
+  //       controller.enqueue(encoder.encode(file) + " ");
+  //       await delay(500);
+  //     }
+  //     // for (let i = 0; i < 20; i++) {
+  //     //   controller.enqueue(encoder.encode("hello"));
+  //     //   await delay(1000);
+  //     // }
+  //     controller.close();
+  //   },
+  // });
 
-  return new Response(readable, {
-    headers: {
-      "content-type": "text/event-stream",
-    },
-  });
+  // return new Response(readable, {
+  //   headers: {
+  //     "content-type": "text/event-stream",
+  //   },
+  // });
 }
 /**
  * Creates a new sticker-set
@@ -79,7 +84,7 @@ export const POST: RequestHandler = async ({ request }) => {
       controller.enqueue(encoder.encode("stitching images to webm"));
       const webmFileName = await convertFramesToWebm(tempName);
       await cleanup(tempName);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       controller.enqueue(encoder.encode("uploading sticker file"));
       const uploadResponse = await uploadStickerFile({
@@ -146,7 +151,7 @@ export const PUT: RequestHandler = async ({ request }) => {
         controller.enqueue(encoder.encode("stitching images to webm"));
         const webmFileName = await convertFramesToWebm(tempName);
         await cleanup(tempName);
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         controller.enqueue(encoder.encode("uploading sticker file"));
         const uploadResponse = await uploadStickerFile({
