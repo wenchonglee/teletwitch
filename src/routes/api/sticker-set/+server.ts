@@ -10,10 +10,21 @@ function delay(ms: number): Promise<void> {
 }
 
 export function GET({ url }) {
-  const fileList = readdirSync(url.searchParams.get("path")!);
-  const anotherfileList = readdirSync(process.cwd() + url.searchParams.get("path")!);
+  const o: Record<string, string[]> = {};
+  try {
+    const base = readdirSync(url.searchParams.get("path")!);
+    o["base"] = base;
+  } catch (err) {
+    o["base"] = ["error!"];
+  }
+  try {
+    const cwd = readdirSync(process.cwd() + url.searchParams.get("path")!);
+    o["cwd"] = cwd;
+  } catch (err) {
+    o["cwd"] = ["error!"];
+  }
 
-  return json({ fileList, anotherfileList });
+  return json(o);
 
   // const fileList = readdirSync("./");
   // const fileList2 = readdirSync("./vercel");
