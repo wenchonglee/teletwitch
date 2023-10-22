@@ -3,12 +3,18 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$lib/server/webp";
 import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
 import { get7tvEmote } from "$lib/server/7tv";
+import { readdirSync, statSync } from "node:fs";
 
 function delay(ms: number): Promise<void> {
   return new Promise((res) => setTimeout(res, ms));
 }
 
 export function GET() {
+  const fileList = readdirSync("./");
+  for (const file of fileList) {
+    const name = `${file}`;
+    console.log(name);
+  }
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
