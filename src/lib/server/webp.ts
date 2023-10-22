@@ -4,10 +4,11 @@ import { exec as baseExec } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { path } from "@ffmpeg-installer/ffmpeg";
 import ffmpeg from "fluent-ffmpeg";
-import { platform } from "node:os";
+import { platform, tmpdir } from "node:os";
 
 ffmpeg.setFfmpegPath(path);
 const exec = util.promisify(baseExec);
+const tmp = tmpdir();
 
 /**
  *
@@ -15,7 +16,7 @@ const exec = util.promisify(baseExec);
  *
  */
 const resizeWebp = async (tempName: string, emote: ArrayBuffer) => {
-  const fileName = `/tmp/${tempName}.webp`;
+  const fileName = `${tmp}/${tempName}.webp`;
 
   // TODO: determine if the file is animated and longer than 3seconds
   await sharp(emote, { animated: true }).resize(512).toFile(fileName);
@@ -28,14 +29,10 @@ const resizeWebp = async (tempName: string, emote: ArrayBuffer) => {
  *
  */
 const convertWebpToFrames = async (prefix: string, webpFileName: string) => {
-  if (!existsSync("/tmp")) {
-    mkdirSync("/tmp");
-  }
-
   if (platform() === "win32") {
-    await exec(`"bin/anim_dump.exe" -folder /tmp -prefix ${prefix}_ ${webpFileName}`);
+    await exec(`"./bin/anim_dump.exe" -folder ${tmp} -prefix ${prefix}_ ${webpFileName}`);
   } else {
-    await exec(`"bin/anim_dump" -folder /tmp -prefix ${prefix}_ ${webpFileName}`);
+    await exec(`"./bin/anim_dump" -folder ${tmp} -prefix ${prefix}_ ${webpFileName}`);
   }
 };
 
@@ -46,10 +43,10 @@ const convertWebpToFrames = async (prefix: string, webpFileName: string) => {
  *
  */
 const convertFramesToWebm = async (fileName: string) => {
-  const webmFileName = `/tmp/${fileName}.webm`;
+  const webmFileName = `${tmp}/${fileName}.webm`;
 
   // TODO: resulting size must be below 256KB
-  ffmpeg(`/tmp/${fileName}_%04d.png`)
+  ffmpeg(`${tmp}/${fileName}_%04d.png`)
     //   .outputOptions(["-crf", "63"])
     .save(webmFileName);
 
