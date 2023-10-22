@@ -9,13 +9,20 @@ function delay(ms: number): Promise<void> {
   return new Promise((res) => setTimeout(res, ms));
 }
 
-export function GET() {
-  const fileList = readdirSync("./");
+export function GET({ url }) {
+  const fileList = readdirSync(url.searchParams.get("path")!);
+  const anotherfileList = readdirSync(process.cwd() + url.searchParams.get("path")!);
+
+  return json({ fileList, anotherfileList });
+
+  // const fileList = readdirSync("./");
+  // const fileList2 = readdirSync("./vercel");
+  // const fileList3 = readdirSync("/vercel");
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
       for (const file of fileList) {
-        controller.enqueue(encoder.encode(file));
+        controller.enqueue(encoder.encode(file) + " ");
         await delay(500);
       }
       // for (let i = 0; i < 20; i++) {
