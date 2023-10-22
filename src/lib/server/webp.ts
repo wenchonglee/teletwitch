@@ -29,7 +29,7 @@ const resizeWebp = async (tempName: string, emote: ArrayBuffer) => {
  *
  */
 const convertWebpToFrames = async (prefix: string, webpFileName: string) => {
-  const path = import.meta.env["VERCEL"] === 1 ? "./vercel/path0/.svelte-kit/output/server/bin" : "./bin";
+  const path = import.meta.env["DEV"] ? "./bin" : "./vercel/path0/.svelte-kit/output/server/bin";
   const binary = platform() === "win32" ? "anim_dump.exe" : "anim_dump";
 
   await exec(`"${path}/${binary}" -folder ${tmp} -prefix ${prefix}_ ${webpFileName}`);
