@@ -8,7 +8,8 @@
     "build": "vite build && cp -r bin/ .svelte-kit/output/client/bin/",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "drizzle": "drizzle-kit generate:pg"
   },
   "devDependencies": {
     "@ffmpeg-installer/ffmpeg": "1.1.0",
@@ -16,10 +17,13 @@
     "@sveltejs/kit": "1.25.2",
     "@types/fluent-ffmpeg": "2.1.22",
     "axios": "1.5.1",
+    "drizzle-kit": "0.19.13",
+    "drizzle-orm": "0.28.6",
     "fluent-ffmpeg": "2.1.2",
     "graphql": "16.8.1",
     "graphql-request": "6.1.0",
     "open-props": "1.6.7",
+    "postgres": "3.4.0",
     "sharp": "0.32.6",
     "svelte": "4.2.1",
     "svelte-check": "3.5.2",

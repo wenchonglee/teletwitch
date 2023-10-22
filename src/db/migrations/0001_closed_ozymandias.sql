@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "user_id_idx" ON "sticker_set" ("user_id");
