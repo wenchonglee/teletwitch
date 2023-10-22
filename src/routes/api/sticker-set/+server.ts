@@ -4,12 +4,7 @@ import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$
 import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
 import { get7tvEmote } from "$lib/server/7tv";
 import { readdirSync } from "node:fs";
-import type { Config } from "@sveltejs/adapter-vercel";
 import { PostSchema, PutSchema } from "./models.js";
-
-export const config: Config = {
-  runtime: "edge",
-};
 
 export function GET({ url }) {
   const o: Record<string, string[]> = {};
