@@ -24,8 +24,8 @@ type Gql7tvResponse = {
 };
 
 const search7tv = gql`
-  query ($query: String!) {
-    emotes(query: $query, page: 0, limit: 25, filter: { animated: true }) {
+  query ($query: String!, $animated: Boolean!) {
+    emotes(query: $query, page: 0, limit: 25, filter: { animated: $animated }) {
       count
       items {
         id
@@ -46,9 +46,10 @@ const search7tv = gql`
   }
 `;
 
-const fetch7tvEmotes = async (query: string = "") => {
+const fetch7tvEmotes = async (query: string = "", animated: boolean = true) => {
   const data = await request<Gql7tvResponse>("https://7tv.io/v3/gql", search7tv, {
     query,
+    animated,
   });
 
   return data;

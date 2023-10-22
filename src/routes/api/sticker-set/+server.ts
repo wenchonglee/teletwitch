@@ -1,61 +1,158 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 
 import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$lib/server/webp";
-import { createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
+import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
 import { get7tvEmote } from "$lib/server/7tv";
 
-export function GET() {
-  const number = Math.floor(Math.random() * 6) + 1;
-
-  return json(number);
+function delay(ms: number): Promise<void> {
+  return new Promise((res) => setTimeout(res, ms));
 }
 
+export function GET() {
+  const encoder = new TextEncoder();
+  const readable = new ReadableStream({
+    async start(controller) {
+      for (let i = 0; i < 20; i++) {
+        controller.enqueue(encoder.encode("hello"));
+        await delay(1000);
+      }
+      controller.close();
+    },
+  });
+
+  return new Response(readable, {
+    headers: {
+      "content-type": "text/event-stream",
+    },
+  });
+}
 /**
  * Creates a new sticker-set
  *
- * Accepts:
- * - emoteUrl
- * - stickerSetName
- * -
  */
 export const POST: RequestHandler = async ({ request }) => {
-  const form = await request.formData();
-  const stickerUrl = form.get("stickerUrl") as string;
+  const encoder = new TextEncoder();
+  const readable = new ReadableStream({
+    async start(controller) {
+      controller.enqueue(encoder.encode("hello"));
 
-  for (const pair of form.entries()) {
-    console.log(`${pair[0]}, ${pair[1]}`);
-  }
-  const tempName = Date.now().toString();
+      const form = await request.formData();
+      const stickerUrl = form.get("stickerUrl") as string;
 
-  const emote = await get7tvEmote(stickerUrl);
-  const resizedWebpFileName = await resizeWebp(tempName, emote);
-  // todo: if not animated, stop here
+      for (const pair of form.entries()) {
+        console.log(`${pair[0]}, ${pair[1]}`);
+      }
+      const tempName = Date.now().toString();
+      controller.enqueue(encoder.encode("downloading video"));
 
-  await convertWebpToFrames(tempName, resizedWebpFileName);
-  const webmFileName = await convertFramesToWebm(tempName);
-  await cleanup(tempName);
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+      const emote = await get7tvEmote(stickerUrl);
+      controller.enqueue(encoder.encode("resizing video"));
+      const resizedWebpFileName = await resizeWebp(tempName, emote);
+      // todo: if not animated, stop here
 
-  const uploadResponse = await uploadStickerFile({
-    filePath: webmFileName,
-    stickerFormat: form.get("stickerFormat") as "video",
-    userId: form.get("userId") as string,
+      controller.enqueue(encoder.encode("slicing video to images "));
+      await convertWebpToFrames(tempName, resizedWebpFileName);
+      controller.enqueue(encoder.encode("stitching images to webm"));
+      const webmFileName = await convertFramesToWebm(tempName);
+      await cleanup(tempName);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      controller.enqueue(encoder.encode("uploading sticker file"));
+      const uploadResponse = await uploadStickerFile({
+        filePath: webmFileName,
+        stickerFormat: form.get("stickerFormat") as "video",
+        userId: form.get("userId") as string,
+      });
+      console.log(uploadResponse);
+      if (!uploadResponse) {
+        return json("oh no");
+      }
+      // https://github.com/sveltejs/kit/issues/5344
+
+      controller.enqueue(encoder.encode("creating stickerset"));
+      // const newStickerResponse = await createNewStickerSet({
+      //   stickerFileId: uploadResponse.result.file_id,
+      //   emojiList: ["🤣"],
+      //   name: form.get("stickerSetName") as string,
+      //   stickerFormat: form.get("stickerFormat") as "video",
+      //   title: "mock_title",
+      //   userId: form.get("userId") as string,
+      // });
+
+      // console.log(newStickerResponse);
+      controller.close();
+    },
   });
-  console.log(uploadResponse);
-  if (!uploadResponse) {
-    return json("oh no");
-  }
 
-  const newStickerResponse = await createNewStickerSet({
-    stickerFileId: uploadResponse.result.file_id,
-    emojiList: ["🤣"],
-    name: form.get("stickerSetName") as string,
-    stickerFormat: form.get("stickerFormat") as "video",
-    title: "mock_title",
-    userId: form.get("userId") as string,
+  // return json(newStickerResponse);
+  return new Response(readable, {
+    headers: {
+      "content-type": "text/event-stream",
+    },
+  });
+};
+
+/**
+ * Add to an existing sticker-set
+ *
+ */
+export const PUT: RequestHandler = async ({ request }) => {
+  const encoder = new TextEncoder();
+  const readable = new ReadableStream({
+    async start(controller) {
+      controller.enqueue(encoder.encode("hello"));
+
+      const form = await request.formData();
+      const stickerUrl = form.get("stickerUrl") as string;
+
+      for (const pair of form.entries()) {
+        console.log(`${pair[0]}, ${pair[1]}`);
+      }
+      const tempName = Date.now().toString();
+      controller.enqueue(encoder.encode("downloading video"));
+
+      const emote = await get7tvEmote(stickerUrl);
+      controller.enqueue(encoder.encode("resizing video"));
+      const resizedWebpFileName = await resizeWebp(tempName, emote);
+      // todo: if not animated, stop here
+
+      controller.enqueue(encoder.encode("slicing video to images "));
+      await convertWebpToFrames(tempName, resizedWebpFileName);
+      controller.enqueue(encoder.encode("stitching images to webm"));
+      const webmFileName = await convertFramesToWebm(tempName);
+      await cleanup(tempName);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      controller.enqueue(encoder.encode("uploading sticker file"));
+      const uploadResponse = await uploadStickerFile({
+        filePath: webmFileName,
+        stickerFormat: form.get("stickerFormat") as "video",
+        userId: form.get("userId") as string,
+      });
+      console.log(uploadResponse);
+      if (!uploadResponse) {
+        return json("oh no");
+      }
+      // https://github.com/sveltejs/kit/issues/5344
+
+      controller.enqueue(encoder.encode("adding to stickerset"));
+      const newStickerResponse = await addStickerToSet({
+        stickerFileId: uploadResponse.result.file_id,
+        emojiList: ["🤣"],
+        name: form.get("stickerSetName") as string,
+        userId: form.get("userId") as string,
+      });
+      controller.enqueue(encoder.encode("sticker added!"));
+
+      // console.log(newStickerResponse);
+      controller.close();
+    },
   });
 
-  console.log(newStickerResponse);
-
-  return json(newStickerResponse);
+  // return json(newStickerResponse);
+  return new Response(readable, {
+    headers: {
+      "content-type": "text/event-stream",
+    },
+  });
 };

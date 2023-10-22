@@ -1,18 +1,30 @@
+<script>
+  let stickerSetName = "";
+</script>
+
 <main>
   <div class="container">
     <h1>Teletwitch</h1>
     <div class="subtext">Convert 3rd party Twitch emotes to Telegram stickers</div>
     <div class="emotes">
-      <img src="https://cdn.7tv.app/emote/63c4072796a3360a4e25c54e/1x.webp" title="scrajj" alt="scrajj" />
-      <img src="https://cdn.7tv.app/emote/62523dbbbab59cfd1b8b889d/1x.webp" alt="joel" />
-      <img src="https://cdn.7tv.app/emote/618302fe8d50b5f26ee7b9bc/1x.webp" alt="" />
-      <img src="https://cdn.7tv.app/emote/60b00d1f0d3a78a196f803e3/1x.webp" alt="ratjam" />
-      <img src="https://cdn.7tv.app/emote/60abf171870d317bef23d399/1x.webp" alt="" />
-      <img src="https://cdn.7tv.app/emote/6197e2aaeecae7a725bbffed/1x.webp" alt="" />
-      <img src="https://cdn.7tv.app/emote/61413cbf7b14fdf700b8efb6/1x.webp" alt="" />
+      <img src="https://cdn.7tv.app/emote/62f1f34b1de84f086742bbf4/2x.webp" alt="jigglin" />
+      <img src="https://cdn.7tv.app/emote/617f15a5b0bfad9428970713/2x.webp" alt="WIGGLE" />
+      <img src="https://cdn.7tv.app/emote/60c0d373ff4047301e860e09/2x.webp" alt="KEKWiggle" />
+      <img src="https://cdn.7tv.app/emote/64ee0aed1fb60a456607eab1/2x.webp" alt="owoWiggle" />
+      <img src="https://cdn.7tv.app/emote/6257e5450017a3216caea5f0/2x.webp" alt="Wiggle" />
+      <img src="https://cdn.7tv.app/emote/61ffea29a5c9454acb3a3f93/2x.webp" alt="guraWiggle" />
+      <img src="https://cdn.7tv.app/emote/6102c9afa57eeb23c0e3e76c/2x.webp" alt="BIGFROGQUICK" />
     </div>
-
     <a href="/sticker-set/new">Create a new sticker set</a>
+
+    <br />
+    <br />
+    <br />
+    <input bind:value={stickerSetName} placeholder="Enter sticker set name" />
+
+    {#if stickerSetName !== ""}
+      <a href={`/sticker-set/${stickerSetName}`}>Update a sticker set</a>
+    {/if}
   </div>
 </main>
 
@@ -36,6 +48,7 @@
 
   img {
     border-radius: var(--size-2);
+    height: 64px;
   }
 
   a {

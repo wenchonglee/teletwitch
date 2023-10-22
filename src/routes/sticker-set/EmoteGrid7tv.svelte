@@ -1,22 +1,31 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
   import { fetch7tvEmotes } from "./fetchEmotes";
-  import { store } from "./store";
+  import { stickerUrl, stickerFormat } from "./store";
 
-  let promise = fetch7tvEmotes();
+  let promise = fetch7tvEmotes("", $stickerFormat === "video");
+
+  stickerFormat.subscribe((run) => {
+    promise = fetch7tvEmotes("", $stickerFormat === "video");
+  });
 
   let timeoutId: ReturnType<typeof setTimeout>;
   const debouncedInput = (query: string) => {
     clearTimeout(timeoutId);
 
     timeoutId = setTimeout(function () {
-      promise = fetch7tvEmotes(query);
+      promise = fetch7tvEmotes(query, $stickerFormat === "video");
     }, 300);
   };
+
+  onDestroy(() => {
+    stickerUrl.set("");
+  });
 </script>
 
 <div>
   <input placeholder="Search" on:input={(e) => debouncedInput(e.currentTarget.value)} />
-  <span>{$store.stickerUrl}</span>
+  <span>{$stickerUrl}</span>
   <div class="emote-grid">
     {#await promise}
       <p>waiting...</p>
@@ -25,8 +34,8 @@
         <button
           type="button"
           class="emote-container"
-          data-selected={String($store.stickerUrl === `https:${host.url}/2x.webp`)}
-          on:click={() => store.setStickerUrl(`https:${host.url}/2x.webp`)}
+          data-selected={String($stickerUrl === `https:${host.url}/2x.webp`)}
+          on:click={() => stickerUrl.set(`https:${host.url}/2x.webp`)}
         >
           <img src={`https:${host.url}/2x.webp`} alt={name} title={name} />
           <span>{name}</span>

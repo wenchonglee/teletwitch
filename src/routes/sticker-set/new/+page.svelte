@@ -1,21 +1,30 @@
 <script lang="ts">
-  import EmoteGrid7tv from "./EmoteGrid7tv.svelte";
-  import { store } from "./store";
+  import EmoteGrid7tv from "../EmoteGrid7tv.svelte";
+  import { stickerUrl, stickerFormat } from "../store";
   import { PUBLIC_USER_ID } from "$env/static/public";
 
-  let responseMessage: string;
+  let current = "empty";
 
   async function submit(e: SubmitEvent) {
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     for (const pair of formData.entries()) {
       console.log(`${pair[0]}, ${pair[1]}`);
     }
-    formData.set("stickerUrl", $store.stickerUrl);
-    console.log($store.stickerUrl);
+    formData.set("stickerUrl", $stickerUrl);
+    console.log($stickerUrl);
     const response = await fetch("/api/sticker-set", {
       method: "POST",
       body: formData,
     });
+    if (!response.body) return;
+
+    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+    while (true) {
+      const { value, done } = await reader.read();
+      console.log(value);
+      if (done) break;
+      current = value;
+    }
     // const data = await response.json();
     // responseMessage = data.message;
   }
@@ -33,12 +42,12 @@
   </div>
 
   <div>
-    <input type="radio" id="video" name="stickerFormat" value="video" checked />
+    <input type="radio" id="video" name="stickerFormat" value="video" bind:group={$stickerFormat} />
     <label for="video">Video</label>
   </div>
 
   <div>
-    <input type="radio" id="static" name="stickerFormat" value="static" />
+    <input type="radio" id="static" name="stickerFormat" value="static" bind:group={$stickerFormat} />
     <label for="static">Static</label>
   </div>
 
@@ -50,6 +59,8 @@
   <button> Create </button>
 
   <EmoteGrid7tv />
+
+  <p>{current}</p>
 </form>
 
 <style>
