@@ -11,17 +11,17 @@ function delay(ms: number): Promise<void> {
 
 export function GET() {
   const fileList = readdirSync("./");
-  for (const file of fileList) {
-    const name = `${file}`;
-    console.log(name);
-  }
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
-      for (let i = 0; i < 20; i++) {
-        controller.enqueue(encoder.encode("hello"));
-        await delay(1000);
+      for (const file of fileList) {
+        controller.enqueue(encoder.encode(file));
+        await delay(500);
       }
+      // for (let i = 0; i < 20; i++) {
+      //   controller.enqueue(encoder.encode("hello"));
+      //   await delay(1000);
+      // }
       controller.close();
     },
   });
