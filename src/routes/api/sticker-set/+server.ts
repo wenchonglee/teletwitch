@@ -132,7 +132,7 @@ export const PUT: RequestHandler = async ({ request }) => {
         });
         console.log(uploadResponse);
         if (!uploadResponse) {
-          return json("oh no");
+          throw new Error("Upload failed");
         }
         // https://github.com/sveltejs/kit/issues/5344
 
