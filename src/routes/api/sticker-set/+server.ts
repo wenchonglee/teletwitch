@@ -1,14 +1,11 @@
-import { json, type RequestHandler } from "@sveltejs/kit";
+import { error, json, type RequestHandler } from "@sveltejs/kit";
 
 import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$lib/server/webp";
 import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
 import { get7tvEmote } from "$lib/server/7tv";
-import { readdirSync, statSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import type { Config } from "@sveltejs/adapter-vercel";
-
-function delay(ms: number): Promise<void> {
-  return new Promise((res) => setTimeout(res, ms));
-}
+import { PostSchema, PutSchema } from "./models.js";
 
 export const config: Config = {
   runtime: "edge",
@@ -30,85 +27,74 @@ export function GET({ url }) {
   }
 
   return json(o);
-
-  // const fileList = readdirSync("./");
-  // const fileList2 = readdirSync("./vercel");
-  // const fileList3 = readdirSync("/vercel");
-  // const encoder = new TextEncoder();
-  // const readable = new ReadableStream({
-  //   async start(controller) {
-  //     for (const file of fileList) {
-  //       controller.enqueue(encoder.encode(file) + " ");
-  //       await delay(500);
-  //     }
-  //     // for (let i = 0; i < 20; i++) {
-  //     //   controller.enqueue(encoder.encode("hello"));
-  //     //   await delay(1000);
-  //     // }
-  //     controller.close();
-  //   },
-  // });
-
-  // return new Response(readable, {
-  //   headers: {
-  //     "content-type": "text/event-stream",
-  //   },
-  // });
 }
+
 /**
+ *
  * Creates a new sticker-set
  *
  */
 export const POST: RequestHandler = async ({ request }) => {
+  const formData = Object.fromEntries(await request.formData());
+  const parsed = PostSchema.safeParse(formData);
+
+  if (!parsed.success) {
+    throw error(400, parsed.error.message);
+  }
+
+  const { data } = parsed;
   const encoder = new TextEncoder();
+
   const readable = new ReadableStream({
     async start(controller) {
-      controller.enqueue(encoder.encode("hello"));
-
-      const form = await request.formData();
-      const stickerUrl = form.get("stickerUrl") as string;
-
-      for (const pair of form.entries()) {
-        console.log(`${pair[0]}, ${pair[1]}`);
-      }
       const tempName = Date.now().toString();
-      controller.enqueue(encoder.encode("downloading video"));
 
-      const emote = await get7tvEmote(stickerUrl);
-      controller.enqueue(encoder.encode("resizing video"));
+      controller.enqueue(encoder.encode("Retrieving emote"));
+      const emote = await get7tvEmote(data.stickerUrl);
+
+      controller.enqueue(encoder.encode("Resizing emote"));
       const resizedWebpFileName = await resizeWebp(tempName, emote);
-      // todo: if not animated, stop here
 
-      controller.enqueue(encoder.encode("slicing video to images "));
-      await convertWebpToFrames(tempName, resizedWebpFileName);
-      controller.enqueue(encoder.encode("stitching images to webm"));
-      const webmFileName = await convertFramesToWebm(tempName);
+      let filePath = resizedWebpFileName;
+
+      if (data.format === "video") {
+        controller.enqueue(encoder.encode("Slicing emote into image frames"));
+        await convertWebpToFrames(tempName, resizedWebpFileName);
+
+        controller.enqueue(encoder.encode("Stitching image frames into webm video"));
+        filePath = await convertFramesToWebm(tempName);
+
+        // todo: do we need still need this arbitrary wait?
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
       await cleanup(tempName);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      controller.enqueue(encoder.encode("uploading sticker file"));
+      controller.enqueue(encoder.encode("Uploading sticker file to Telegram"));
       const uploadResponse = await uploadStickerFile({
-        filePath: webmFileName,
-        stickerFormat: form.get("stickerFormat") as "video",
-        userId: form.get("userId") as string,
+        filePath,
+        format: data.format,
+        userId: data.userId,
       });
       console.log(uploadResponse);
-      if (!uploadResponse) {
-        return json("oh no");
+
+      if (!uploadResponse || !uploadResponse.ok) {
+        throw error(500, { message: "Upload to telegram failed" });
       }
+
       // https://github.com/sveltejs/kit/issues/5344
+      controller.enqueue(encoder.encode("Creating stickerset on Telegram"));
+      const newStickerResponse = await createNewStickerSet({
+        stickerFileId: uploadResponse.result.file_id,
+        emoji: data.emoji,
+        name: `${data.title}_by_teletwitchsticker_bot`,
+        format: data.format,
+        title: data.title,
+        userId: data.userId,
+      });
+      console.log(newStickerResponse);
 
-      controller.enqueue(encoder.encode("creating stickerset"));
-      // const newStickerResponse = await createNewStickerSet({
-      //   stickerFileId: uploadResponse.result.file_id,
-      //   emojiList: ["🤣"],
-      //   name: form.get("stickerSetName") as string,
-      //   stickerFormat: form.get("stickerFormat") as "video",
-      //   title: "mock_title",
-      //   userId: form.get("userId") as string,
-      // });
-
-      // console.log(newStickerResponse);
+      controller.enqueue(encoder.encode("Stickerset created!"));
       controller.close();
     },
   });
@@ -126,65 +112,69 @@ export const POST: RequestHandler = async ({ request }) => {
  *
  */
 export const PUT: RequestHandler = async ({ request }) => {
+  const formData = Object.fromEntries(await request.formData());
+  const parsed = PutSchema.safeParse(formData);
+
+  if (!parsed.success) {
+    throw error(400, parsed.error.message);
+  }
+
+  const { data } = parsed;
   const encoder = new TextEncoder();
+
   const readable = new ReadableStream({
     async start(controller) {
-      controller.enqueue(encoder.encode("hello"));
+      const tempName = Date.now().toString();
 
-      try {
-        const form = await request.formData();
-        const stickerUrl = form.get("stickerUrl") as string;
+      controller.enqueue(encoder.encode("Retrieving emote"));
+      const emote = await get7tvEmote(data.stickerUrl);
 
-        for (const pair of form.entries()) {
-          console.log(`${pair[0]}, ${pair[1]}`);
-        }
-        const tempName = Date.now().toString();
-        controller.enqueue(encoder.encode("downloading video"));
+      controller.enqueue(encoder.encode("Resizing emote"));
+      const resizedWebpFileName = await resizeWebp(tempName, emote);
 
-        const emote = await get7tvEmote(stickerUrl);
-        controller.enqueue(encoder.encode("resizing video"));
-        const resizedWebpFileName = await resizeWebp(tempName, emote);
-        // todo: if not animated, stop here
+      let filePath = resizedWebpFileName;
 
-        controller.enqueue(encoder.encode("slicing video to images "));
+      if (data.format === "video") {
+        controller.enqueue(encoder.encode("Slicing emote into image frames"));
         await convertWebpToFrames(tempName, resizedWebpFileName);
-        controller.enqueue(encoder.encode("stitching images to webm"));
-        const webmFileName = await convertFramesToWebm(tempName);
-        await cleanup(tempName);
+
+        controller.enqueue(encoder.encode("Stitching image frames into webm video"));
+        filePath = await convertFramesToWebm(tempName);
+
+        // todo: do we need still need this arbitrary wait?
         await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        controller.enqueue(encoder.encode("uploading sticker file"));
-        const uploadResponse = await uploadStickerFile({
-          filePath: webmFileName,
-          stickerFormat: form.get("stickerFormat") as "video",
-          userId: form.get("userId") as string,
-        });
-        console.log(uploadResponse);
-        if (!uploadResponse) {
-          throw new Error("Upload failed");
-        }
-        // https://github.com/sveltejs/kit/issues/5344
-
-        controller.enqueue(encoder.encode("adding to stickerset"));
-        const newStickerResponse = await addStickerToSet({
-          stickerFileId: uploadResponse.result.file_id,
-          emojiList: ["🤣"],
-          name: form.get("stickerSetName") as string,
-          userId: form.get("userId") as string,
-        });
-        controller.enqueue(encoder.encode("sticker added!"));
-      } catch (err) {
-        console.log(err);
       }
-      // console.log(newStickerResponse);
+
+      await cleanup(tempName);
+
+      controller.enqueue(encoder.encode("Uploading sticker file to Telegram"));
+      const uploadResponse = await uploadStickerFile({
+        filePath,
+        format: data.format,
+        userId: data.userId,
+      });
+      console.log(uploadResponse);
+
+      if (!uploadResponse || !uploadResponse.ok) {
+        throw error(500, { message: "Upload to telegram failed" });
+      }
+
+      // https://github.com/sveltejs/kit/issues/5344
+      controller.enqueue(encoder.encode("Adding sticker to stickerset on Telegram"));
+      const newStickerResponse = await addStickerToSet({
+        stickerFileId: uploadResponse.result.file_id,
+        emoji: data.emoji,
+        name: `${data.title}_by_teletwitchsticker_bot`,
+        userId: data.userId,
+      });
+      console.log(newStickerResponse);
+
+      controller.enqueue(encoder.encode("Sticker added!"));
       controller.close();
     },
   });
 
-  // return json(newStickerResponse);
   return new Response(readable, {
-    headers: {
-      "content-type": "text/event-stream",
-    },
+    headers: { "content-type": "text/event-stream" },
   });
 };

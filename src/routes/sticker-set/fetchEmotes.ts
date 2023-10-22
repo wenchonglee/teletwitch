@@ -47,12 +47,15 @@ const search7tv = gql`
 `;
 
 const fetch7tvEmotes = async (query: string = "", animated: boolean = true) => {
-  const data = await request<Gql7tvResponse>("https://7tv.io/v3/gql", search7tv, {
-    query,
-    animated,
-  });
-
-  return data;
+  try {
+    const data = await request<Gql7tvResponse>("https://7tv.io/v3/gql", search7tv, {
+      query,
+      animated,
+    });
+    return data;
+  } catch (err) {
+    return null;
+  }
 };
 
 export { fetch7tvEmotes };

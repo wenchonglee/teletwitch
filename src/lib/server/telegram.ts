@@ -1,5 +1,5 @@
 import { createReadStream } from "node:fs";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { BOT_TOKEN } from "$env/static/private";
 
 const tgAxios = axios.create({
@@ -20,20 +20,20 @@ type GenericResponse = { ok: boolean; result: boolean };
 type UploadStickerFileParams = {
   userId: string;
   filePath: string;
-  stickerFormat: "video" | "static";
+  format: "video" | "static";
 };
 
 const uploadStickerFile = async (params: UploadStickerFileParams) => {
-  const { filePath, userId, stickerFormat } = params;
+  const { filePath, userId, format } = params;
   const stream = createReadStream(filePath);
-  console.log("uploading", filePath, userId, stickerFormat);
+  console.log("uploading", filePath, userId, format);
   try {
     const response = await tgAxios.post<UploadStickerFileResponse>(
       "/uploadStickerFile",
       {
         user_id: Number(userId),
         sticker: stream,
-        sticker_format: stickerFormat,
+        sticker_format: format,
       },
       {
         headers: { "Content-Type": "multipart/form-data" },
@@ -53,13 +53,13 @@ type CreateNewStickerSetParams = {
   name: string;
   title: string;
   stickerFileId: string;
-  emojiList: string[];
-  stickerFormat: "video" | "static";
+  emoji: string[];
+  format: "video" | "static";
 };
 
 const createNewStickerSet = async (params: CreateNewStickerSetParams) => {
-  const { userId, name, title, emojiList, stickerFileId, stickerFormat } = params;
-  console.log("creating new stickerset", userId, name, title, emojiList, stickerFileId, stickerFormat);
+  const { userId, name, title, emoji, stickerFileId, format } = params;
+  console.log("creating new stickerset", userId, name, title, emoji, stickerFileId, format);
   try {
     const response = await tgAxios.post<GenericResponse>("/createNewStickerSet", {
       user_id: Number(userId),
@@ -67,11 +67,11 @@ const createNewStickerSet = async (params: CreateNewStickerSetParams) => {
       title,
       stickers: [
         {
-          emoji_list: emojiList,
+          emoji_list: emoji,
           sticker: stickerFileId,
         },
       ],
-      sticker_format: stickerFormat,
+      sticker_format: format,
     });
 
     return response.data;
@@ -87,18 +87,18 @@ type AddStickerToSetParams = {
   userId: string;
   name: string;
   stickerFileId: string;
-  emojiList: string[];
+  emoji: string[];
 };
 
 const addStickerToSet = async (params: AddStickerToSetParams) => {
-  const { userId, name, emojiList, stickerFileId } = params;
+  const { userId, name, emoji, stickerFileId } = params;
 
   try {
     const response = await tgAxios.post<GenericResponse>("/addStickerToSet", {
       user_id: userId,
       name,
       sticker: {
-        emoji_list: emojiList,
+        emoji_list: emoji,
         sticker: stickerFileId,
       },
     });

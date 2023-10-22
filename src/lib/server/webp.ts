@@ -1,7 +1,6 @@
 import sharp from "sharp";
 import util from "node:util";
 import { exec as baseExec } from "node:child_process";
-import { existsSync, mkdirSync } from "node:fs";
 import { path } from "@ffmpeg-installer/ffmpeg";
 import ffmpeg from "fluent-ffmpeg";
 import { platform, tmpdir } from "node:os";

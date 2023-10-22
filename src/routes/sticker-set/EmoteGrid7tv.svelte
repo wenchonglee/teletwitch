@@ -30,17 +30,19 @@
     {#await promise}
       <p>waiting...</p>
     {:then data}
-      {#each data.emotes.items as { name, host }}
-        <button
-          type="button"
-          class="emote-container"
-          data-selected={String($stickerUrl === `https:${host.url}/2x.webp`)}
-          on:click={() => stickerUrl.set(`https:${host.url}/2x.webp`)}
-        >
-          <img src={`https:${host.url}/2x.webp`} alt={name} title={name} />
-          <span>{name}</span>
-        </button>
-      {/each}
+      {#if data !== null}
+        {#each data.emotes.items as { name, host }}
+          <button
+            type="button"
+            class="emote-container"
+            data-selected={String($stickerUrl === `https:${host.url}/2x.webp`)}
+            on:click={() => stickerUrl.set(`https:${host.url}/2x.webp`)}
+          >
+            <img src={`https:${host.url}/2x.webp`} alt={name} title={name} />
+            <span>{name}</span>
+          </button>
+        {/each}
+      {/if}
     {:catch err}
       <p>{err}</p>
     {/await}

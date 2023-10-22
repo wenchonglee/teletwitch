@@ -25,8 +25,6 @@
       if (done) break;
       current = value;
     }
-    // const data = await response.json();
-    // responseMessage = data.message;
   }
 </script>
 
@@ -37,23 +35,23 @@
   </div>
 
   <div class="grid w-full max-w-sm items-center gap-1.5">
-    <label for="stickerSetName">Sticker pack name</label>
-    <input required name="stickerSetName" value="test4_by_teletwitchsticker_bot" />
+    <label for="title">Sticker set title</label>
+    <input required name="title" value="test5" />
   </div>
 
   <div>
-    <input type="radio" id="video" name="stickerFormat" value="video" bind:group={$stickerFormat} />
+    <input type="radio" id="video" name="format" value="video" bind:group={$stickerFormat} />
     <label for="video">Video</label>
   </div>
 
   <div>
-    <input type="radio" id="static" name="stickerFormat" value="static" bind:group={$stickerFormat} />
+    <input type="radio" id="static" name="format" value="static" bind:group={$stickerFormat} />
     <label for="static">Static</label>
   </div>
 
   <div class="grid w-full max-w-sm items-center gap-1.5">
-    <label for="emojiList">Emote</label>
-    <input required name="emojiList" value="🤣" />
+    <label for="emoji">Associated emoji (delimited by comma)</label>
+    <input required name="emoji" value="🤣" />
   </div>
 
   <button> Create </button>

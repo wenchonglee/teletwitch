@@ -26,8 +26,6 @@
       if (done) break;
       current = value;
     }
-    // const data = await response.json();
-    // responseMessage = data.message;
   }
 </script>
 
@@ -38,23 +36,23 @@
   </div>
 
   <div class="grid w-full max-w-sm items-center gap-1.5">
-    <label for="stickerSetName">Sticker pack name</label>
-    <input required name="stickerSetName" value={$page.params.slug} />
+    <label for="title">Sticker pack name</label>
+    <input required name="title" value={$page.params.slug} />
   </div>
 
   <div>
-    <input type="radio" id="video" name="stickerFormat" value="video" bind:group={$stickerFormat} />
+    <input type="radio" id="video" name="format" value="video" bind:group={$stickerFormat} />
     <label for="video">Video</label>
   </div>
 
   <div>
-    <input type="radio" id="static" name="stickerFormat" value="static" bind:group={$stickerFormat} />
+    <input type="radio" id="static" name="format" value="static" bind:group={$stickerFormat} />
     <label for="static">Static</label>
   </div>
 
   <div class="grid w-full max-w-sm items-center gap-1.5">
-    <label for="emojiList">Emote</label>
-    <input required name="emojiList" value="🤣" />
+    <label for="emoji">Emote</label>
+    <input required name="emoji" value="🤣" />
   </div>
 
   <button> Add </button>
