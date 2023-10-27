@@ -1,9 +1,10 @@
 <script lang="ts">
-  import EmoteGrid7tv from "../EmoteGrid7tv.svelte";
-  import { stickerUrl, stickerFormat } from "../store";
-  import { PUBLIC_USER_ID } from "$env/static/public";
   import { page } from "$app/stores";
+  import EmoteGrid7tv from "../EmoteGrid7tv.svelte";
+  import { stickerFormat, stickerUrl } from "../store";
+  import type { PageData } from "./$types";
 
+  export let data: PageData;
   let current = "empty";
 
   async function submit(e: SubmitEvent) {
@@ -30,11 +31,7 @@
 </script>
 
 <form on:submit|preventDefault={submit} class="form">
-  <div class="grid w-full max-w-sm items-center gap-1.5">
-    <label for="userId">User ID</label>
-    <input required name="userId" autocomplete="off" value={PUBLIC_USER_ID} />
-  </div>
-
+  Your userid: {data.userId}
   <div class="grid w-full max-w-sm items-center gap-1.5">
     <label for="title">Sticker pack name</label>
     <input required name="title" value={$page.params.slug} />

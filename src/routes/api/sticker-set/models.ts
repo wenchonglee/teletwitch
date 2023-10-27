@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 const PostSchema = z.object({
-  userId: z.coerce.string().min(1, "userId required"),
   format: z.enum(["video", "static"]),
   stickerUrl: z.string().min(1, "stickerUrl required"),
   emoji: z.preprocess((val) => {

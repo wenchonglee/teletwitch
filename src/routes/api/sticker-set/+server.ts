@@ -1,10 +1,16 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 
-import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$lib/server/webp";
-import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
 import { get7tvEmote } from "$lib/server/7tv";
+import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
+import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$lib/server/webp";
 import { readdirSync } from "node:fs";
 import { PostSchema, PutSchema } from "./models.js";
+
+// const connectionString = env["CONNECTION_STRING"];
+// const client = postgres(connectionString);
+// const db = drizzle(client);
+
+// const allUsers = await db.select().from(stickerSet);
 
 export function GET({ url }) {
   const o: Record<string, string[]> = {};
@@ -29,12 +35,15 @@ export function GET({ url }) {
  * Creates a new sticker-set
  *
  */
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
   const formData = Object.fromEntries(await request.formData());
   const parsed = PostSchema.safeParse(formData);
 
   if (!parsed.success) {
     throw error(400, parsed.error.message);
+  }
+  if (!locals.userId) {
+    throw error(400, "userId not found");
   }
 
   const { data } = parsed;
@@ -69,7 +78,7 @@ export const POST: RequestHandler = async ({ request }) => {
       const uploadResponse = await uploadStickerFile({
         filePath,
         format: data.format,
-        userId: data.userId,
+        userId: locals.userId!,
       });
       console.log(uploadResponse);
 
@@ -85,7 +94,7 @@ export const POST: RequestHandler = async ({ request }) => {
         name: `${data.title}_by_teletwitchsticker_bot`,
         format: data.format,
         title: data.title,
-        userId: data.userId,
+        userId: locals.userId!,
       });
       console.log(newStickerResponse);
 
@@ -106,12 +115,15 @@ export const POST: RequestHandler = async ({ request }) => {
  * Add to an existing sticker-set
  *
  */
-export const PUT: RequestHandler = async ({ request }) => {
+export const PUT: RequestHandler = async ({ request, locals }) => {
   const formData = Object.fromEntries(await request.formData());
   const parsed = PutSchema.safeParse(formData);
 
   if (!parsed.success) {
     throw error(400, parsed.error.message);
+  }
+  if (!locals.userId) {
+    throw error(400, "userId not found");
   }
 
   const { data } = parsed;
@@ -146,7 +158,7 @@ export const PUT: RequestHandler = async ({ request }) => {
       const uploadResponse = await uploadStickerFile({
         filePath,
         format: data.format,
-        userId: data.userId,
+        userId: locals.userId!,
       });
       console.log(uploadResponse);
 
@@ -160,7 +172,7 @@ export const PUT: RequestHandler = async ({ request }) => {
         stickerFileId: uploadResponse.result.file_id,
         emoji: data.emoji,
         name: `${data.title}_by_teletwitchsticker_bot`,
-        userId: data.userId,
+        userId: locals.userId!,
       });
       console.log(newStickerResponse);
 

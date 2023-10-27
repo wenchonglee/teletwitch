@@ -2,21 +2,23 @@ import { BOT_TOKEN } from "$env/static/private";
 import { createHash, createHmac } from "crypto";
 import { z } from "zod";
 
-const AuthSchema = z.object({
+const TokenSchema = z.object({
   auth_date: z.string().min(1),
   first_name: z.string().min(1),
   username: z.string().min(1),
   id: z.string().min(1),
   hash: z.string().min(1),
 });
+type Token = z.infer<typeof TokenSchema>;
+type CheckCookieReturn = { ok: true; data: Token } | { ok: false; error: string };
 
 /**
- * Returns true if the token is valid
+ * Parse and check the stored cookie string
  */
-const checkCookie = (cookieString: string) => {
+const checkCookie = (cookieString: string): CheckCookieReturn => {
   const cookie = JSON.parse(cookieString);
 
-  const authObj = AuthSchema.safeParse(cookie);
+  const authObj = TokenSchema.safeParse(cookie);
   if (!authObj.success) {
     return { ok: false, error: "Invalid login params, something went wrong" };
   }
@@ -27,10 +29,13 @@ const checkCookie = (cookieString: string) => {
     return { ok: false, error: "Invalid auth" };
   }
 
-  return { ok: true, data: authObj };
+  return { ok: true, data: authObj.data };
 };
 
-const checkToken = (token: z.infer<typeof AuthSchema>) => {
+/**
+ * Returns true if the token is valid
+ */
+const checkToken = (token: Token) => {
   const { auth_date, first_name, hash, id, username } = token;
 
   const payload = `auth_date=${auth_date}\nfirst_name=${first_name}\nid=${id}\nusername=${username}`;
@@ -40,4 +45,4 @@ const checkToken = (token: z.infer<typeof AuthSchema>) => {
   return hash === checkHash;
 };
 
-export { AuthSchema, checkCookie, checkToken };
+export { TokenSchema, checkCookie, checkToken };

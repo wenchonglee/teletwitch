@@ -1,4 +1,4 @@
-import { AuthSchema, checkToken } from "$lib/server/auth.js";
+import { TokenSchema, checkToken } from "$lib/server/auth.js";
 import { error, redirect } from "@sveltejs/kit";
 
 /**
@@ -7,7 +7,7 @@ import { error, redirect } from "@sveltejs/kit";
 export function GET({ url, cookies }) {
   const query = Object.fromEntries(url.searchParams);
 
-  const token = AuthSchema.safeParse(query);
+  const token = TokenSchema.safeParse(query);
   if (!token.success) {
     throw error(403, "Invalid login params, something went wrong");
   }
@@ -20,6 +20,8 @@ export function GET({ url, cookies }) {
   cookies.set("telegram_auth", JSON.stringify(token.data), {
     path: "/",
     maxAge: 60 * 60 * 24 * 7, // 1 week
+    sameSite: "lax",
+    httpOnly: true,
   });
 
   throw redirect(307, "/");

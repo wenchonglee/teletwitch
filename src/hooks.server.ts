@@ -15,6 +15,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (!result.ok) {
       throw error(403, result.error);
     }
+
+    event.locals.userId = result.data.id;
   }
 
   const response = await resolve(event);
