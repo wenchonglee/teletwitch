@@ -32,7 +32,7 @@
     data-telegram-login="teletwitchsticker_bot"
     data-size="large"
     data-userpic="false"
-    data-auth-url="/login"
+    data-auth-url="/api/login"
   ></script>
 </main>
 
