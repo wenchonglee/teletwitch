@@ -1,23 +1,31 @@
+import { env } from "$env/dynamic/private";
 import { checkCookie } from "$lib/server/auth";
 import { error, type Handle } from "@sveltejs/kit";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
-const publicPaths = ["/", "/api/login"];
+const connectionString = env["CONNECTION_STRING"];
+const client = postgres(connectionString);
+export const db = drizzle(client);
 
 export const handle: Handle = async ({ event, resolve }) => {
-  if (!publicPaths.includes(event.url.pathname)) {
-    const auth_cookie = event.cookies.get("telegram_auth");
+  const auth_cookie = event.cookies.get("telegram_auth");
 
-    if (!auth_cookie) {
-      throw error(403, "Cookie not presnt");
-    }
-
-    const result = checkCookie(auth_cookie);
-    if (!result.ok) {
-      throw error(403, result.error);
-    }
-
-    event.locals.userId = result.data.id;
+  if (event.url.pathname === "/api/login") {
+    const response = await resolve(event);
+    return response;
   }
+
+  if (!auth_cookie) {
+    throw error(403, "Cookie not presnt");
+  }
+
+  const result = checkCookie(auth_cookie);
+  // throw if cookie is invalid and we're not at base route
+  if (event.url.pathname !== "/" && !result.ok) {
+    throw error(403, result.error);
+  }
+  event.locals.userId = result.ok ? result.data.id : undefined;
 
   const response = await resolve(event);
   return response;

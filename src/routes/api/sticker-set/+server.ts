@@ -6,12 +6,6 @@ import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$
 import { readdirSync } from "node:fs";
 import { PostSchema, PutSchema } from "./models.js";
 
-// const connectionString = env["CONNECTION_STRING"];
-// const client = postgres(connectionString);
-// const db = drizzle(client);
-
-// const allUsers = await db.select().from(stickerSet);
-
 export function GET({ url }) {
   const o: Record<string, string[]> = {};
   try {
