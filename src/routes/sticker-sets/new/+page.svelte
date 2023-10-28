@@ -1,21 +1,19 @@
 <script lang="ts">
-  import { page } from "$app/stores";
   import EmoteGrid7tv from "../EmoteGrid7tv.svelte";
-  import { stickerFormat, stickerUrl } from "../store";
+  import { selectedSticker, stickerFormat } from "../store";
   import type { PageData } from "./$types";
 
   export let data: PageData;
+
   let current = "empty";
 
   async function submit(e: SubmitEvent) {
     const formData = new FormData(e.currentTarget as HTMLFormElement);
-    for (const pair of formData.entries()) {
-      console.log(`${pair[0]}, ${pair[1]}`);
-    }
-    formData.set("stickerUrl", $stickerUrl);
-    console.log($stickerUrl);
-    const response = await fetch("/api/sticker-set", {
-      method: "PUT",
+    formData.set("providerUrl", $selectedSticker.url);
+    formData.set("emote", $selectedSticker.emote);
+
+    const response = await fetch("/api/sticker-sets", {
+      method: "POST",
       body: formData,
     });
     if (!response.body) return;
@@ -33,8 +31,8 @@
 <form on:submit|preventDefault={submit} class="form">
   Your userid: {data.userId}
   <div class="grid w-full max-w-sm items-center gap-1.5">
-    <label for="title">Sticker pack name</label>
-    <input required name="title" value={$page.params.slug} />
+    <label for="title">Sticker set title</label>
+    <input required name="title" value="test5" />
   </div>
 
   <div>
@@ -48,11 +46,11 @@
   </div>
 
   <div class="grid w-full max-w-sm items-center gap-1.5">
-    <label for="emoji">Emote</label>
+    <label for="emoji">Associated emoji (delimited by comma)</label>
     <input required name="emoji" value="🤣" />
   </div>
 
-  <button> Add </button>
+  <button> Create </button>
 
   <EmoteGrid7tv />
 

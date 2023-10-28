@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "teletwitch",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -9,15 +9,14 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "drizzle": "drizzle-kit generate:pg"
+    "drizzle:gen": "drizzle-kit generate:pg",
+    "drizzle:migrate": "node src/db/run_migration"
   },
-  "devDependencies": {
+  "dependencies": {
     "@ffmpeg-installer/ffmpeg": "1.1.0",
     "@sveltejs/adapter-vercel": "3.0.3",
     "@sveltejs/kit": "1.25.2",
-    "@types/fluent-ffmpeg": "2.1.22",
     "axios": "1.5.1",
-    "drizzle-kit": "0.19.13",
     "drizzle-orm": "0.28.6",
     "fluent-ffmpeg": "2.1.2",
     "graphql": "16.8.1",
@@ -26,11 +25,16 @@
     "postgres": "3.4.0",
     "sharp": "0.32.6",
     "svelte": "4.2.1",
+    "zod": "3.22.4"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "2.1.22",
+    "dotenv": "16.3.1",
+    "drizzle-kit": "0.19.13",
     "svelte-check": "3.5.2",
     "tslib": "2.6.2",
     "typescript": "5.2.2",
-    "vite": "4.4.11",
-    "zod": "3.22.4"
+    "vite": "4.4.11"
   },
   "pnpm": {
     "patchedDependencies": {

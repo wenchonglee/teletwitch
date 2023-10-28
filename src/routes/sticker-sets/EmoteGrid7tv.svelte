@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import { fetch7tvEmotes } from "./fetchEmotes";
-  import { stickerUrl, stickerFormat } from "./store";
+  import { selectedSticker, stickerFormat } from "./store";
 
   let promise = fetch7tvEmotes("", $stickerFormat === "video");
 
@@ -19,13 +19,13 @@
   };
 
   onDestroy(() => {
-    stickerUrl.set("");
+    selectedSticker.set({ url: "", emote: "" });
   });
 </script>
 
 <div>
   <input placeholder="Search" on:input={(e) => debouncedInput(e.currentTarget.value)} />
-  <span>{$stickerUrl}</span>
+  <span>{$selectedSticker.url}</span>
   <div class="emote-grid">
     {#await promise}
       <p>waiting...</p>
@@ -35,8 +35,8 @@
           <button
             type="button"
             class="emote-container"
-            data-selected={String($stickerUrl === `https:${host.url}/2x.webp`)}
-            on:click={() => stickerUrl.set(`https:${host.url}/2x.webp`)}
+            data-selected={String($selectedSticker.url === `https:${host.url}/2x.webp`)}
+            on:click={() => selectedSticker.set({ url: `https:${host.url}/2x.webp`, emote: name })}
           >
             <img src={`https:${host.url}/2x.webp`} alt={name} title={name} />
             <span>{name}</span>

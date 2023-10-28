@@ -1,4 +1,7 @@
-<script>
+<script lang="ts">
+  import type { PageData } from "./$types";
+
+  export let data: PageData;
   let stickerSetName = "";
 </script>
 
@@ -15,25 +18,42 @@
       <img src="https://cdn.7tv.app/emote/61ffea29a5c9454acb3a3f93/2x.webp" alt="guraWiggle" />
       <img src="https://cdn.7tv.app/emote/6102c9afa57eeb23c0e3e76c/2x.webp" alt="BIGFROGQUICK" />
     </div>
-    <a href="/sticker-set/new">Create a new sticker set</a>
 
-    <br />
-    <br />
-    <br />
-    <input bind:value={stickerSetName} placeholder="Enter sticker set name" />
+    {#if data.userId === undefined}
+      Log in to Telegram to start
+    {:else}
+      {data.userId}
+      <!-- 
+        Create new sticker-set button
+       -->
 
-    {#if stickerSetName !== ""}
-      <a href={`/sticker-set/${stickerSetName}`}>Update a sticker set</a>
+      <!-- 
+        List of sticker-sets that the user owns
+        -- [ Sticker-set name ]
+        -- [ Created/last updated? ]
+        -- [ 4 or 5 stickers by last updated ]
+        -- [ ]
+       -->
+      <a href="/sticker-sets/new">Create a new sticker set</a>
+
+      <br />
+      <br />
+      <br />
+      <input bind:value={stickerSetName} placeholder="Enter sticker set name" />
+
+      {#if stickerSetName !== ""}
+        <a href={`/sticker-sets/${stickerSetName}`}>Update a sticker set</a>
+      {/if}
     {/if}
+    <script
+      async
+      src="https://telegram.org/js/telegram-widget.js?22"
+      data-telegram-login="teletwitchsticker_bot"
+      data-size="large"
+      data-userpic="false"
+      data-auth-url="/api/login"
+    ></script>
   </div>
-  <script
-    async
-    src="https://telegram.org/js/telegram-widget.js?22"
-    data-telegram-login="teletwitchsticker_bot"
-    data-size="large"
-    data-userpic="false"
-    data-auth-url="/api/login"
-  ></script>
 </main>
 
 <style>

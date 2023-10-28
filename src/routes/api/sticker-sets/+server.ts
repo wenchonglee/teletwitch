@@ -1,9 +1,11 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 
+import { sticker, stickerSet } from "$db/schema.js";
 import { get7tvEmote } from "$lib/server/7tv";
 import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
 import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$lib/server/webp";
 import { readdirSync } from "node:fs";
+import { db } from "../../../hooks.server.js";
 import { PostSchema, PutSchema } from "./models.js";
 
 export function GET({ url }) {
@@ -48,7 +50,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       const tempName = Date.now().toString();
 
       controller.enqueue(encoder.encode("Retrieving emote"));
-      const emote = await get7tvEmote(data.stickerUrl);
+      const emote = await get7tvEmote(data.providerUrl);
 
       controller.enqueue(encoder.encode("Resizing emote"));
       const resizedWebpFileName = await resizeWebp(tempName, emote);
@@ -74,7 +76,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         format: data.format,
         userId: locals.userId!,
       });
-      console.log(uploadResponse);
 
       if (!uploadResponse || !uploadResponse.ok) {
         throw error(500, { message: "Upload to telegram failed" });
@@ -90,9 +91,29 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         title: data.title,
         userId: locals.userId!,
       });
-      console.log(newStickerResponse);
 
       controller.enqueue(encoder.encode("Stickerset created!"));
+
+      await db.transaction(async (tx) => {
+        const [createdStickerSet] = await tx
+          .insert(stickerSet)
+          .values({
+            format: data.format,
+            title: data.title,
+            user_id: locals.userId!,
+          })
+          .returning();
+
+        await tx.insert(sticker).values({
+          sticker_set_id: createdStickerSet.id,
+          emoji: data.emoji.join(","),
+          file_id: uploadResponse.result.file_id,
+          format: data.format,
+          // object_url,
+          provider_emote: data.emote,
+          provider_url: data.providerUrl,
+        });
+      });
       controller.close();
     },
   });
@@ -128,7 +149,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
       const tempName = Date.now().toString();
 
       controller.enqueue(encoder.encode("Retrieving emote"));
-      const emote = await get7tvEmote(data.stickerUrl);
+      const emote = await get7tvEmote(data.providerUrl);
 
       controller.enqueue(encoder.encode("Resizing emote"));
       const resizedWebpFileName = await resizeWebp(tempName, emote);
@@ -154,7 +175,6 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
         format: data.format,
         userId: locals.userId!,
       });
-      console.log(uploadResponse);
 
       if (!uploadResponse || !uploadResponse.ok) {
         throw error(500, { message: "Upload to telegram failed" });
@@ -168,7 +188,6 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
         name: `${data.title}_by_teletwitchsticker_bot`,
         userId: locals.userId!,
       });
-      console.log(newStickerResponse);
 
       controller.enqueue(encoder.encode("Sticker added!"));
       controller.close();

@@ -1,6 +1,6 @@
-import { createReadStream } from "node:fs";
-import axios from "axios";
 import { BOT_TOKEN } from "$env/static/private";
+import axios from "axios";
+import { createReadStream } from "node:fs";
 
 const tgAxios = axios.create({
   baseURL: `https://api.telegram.org/bot${BOT_TOKEN}`,
@@ -26,7 +26,7 @@ type UploadStickerFileParams = {
 const uploadStickerFile = async (params: UploadStickerFileParams) => {
   const { filePath, userId, format } = params;
   const stream = createReadStream(filePath);
-  console.log("uploading", filePath, userId, format);
+
   try {
     const response = await tgAxios.post<UploadStickerFileResponse>(
       "/uploadStickerFile",
@@ -35,9 +35,7 @@ const uploadStickerFile = async (params: UploadStickerFileParams) => {
         sticker: stream,
         sticker_format: format,
       },
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
 
     return response.data;
@@ -59,7 +57,7 @@ type CreateNewStickerSetParams = {
 
 const createNewStickerSet = async (params: CreateNewStickerSetParams) => {
   const { userId, name, title, emoji, stickerFileId, format } = params;
-  console.log("creating new stickerset", userId, name, title, emoji, stickerFileId, format);
+
   try {
     const response = await tgAxios.post<GenericResponse>("/createNewStickerSet", {
       user_id: Number(userId),
@@ -76,7 +74,6 @@ const createNewStickerSet = async (params: CreateNewStickerSetParams) => {
 
     return response.data;
   } catch (err: any) {
-    //   console.log(err.response.data);
     // TODO: handle errors
     console.log(err.response.data);
     return null;
@@ -110,4 +107,4 @@ const addStickerToSet = async (params: AddStickerToSetParams) => {
   }
 };
 
-export { tgAxios, uploadStickerFile, createNewStickerSet, addStickerToSet };
+export { addStickerToSet, createNewStickerSet, tgAxios, uploadStickerFile };
