@@ -15,7 +15,10 @@ type CheckCookieReturn = { ok: true; data: Token } | { ok: false; error: string 
 /**
  * Parse and check the stored cookie string
  */
-const checkCookie = (cookieString: string): CheckCookieReturn => {
+const checkCookie = (cookieString: string | undefined): CheckCookieReturn => {
+  if (!cookieString) {
+    return { ok: false, error: "Cookie not present" };
+  }
   const cookie = JSON.parse(cookieString);
 
   const authObj = TokenSchema.safeParse(cookie);

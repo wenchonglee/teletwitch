@@ -5,8 +5,3 @@ html {
   --font-sans: "Inter", Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, Segoe UI, Roboto, Ubuntu, Cantarell,
     Noto Sans, sans-serif;
 }
-@media (min-width: 1024px) {
-  body {
-    margin-inline: 12em;
-  }
-}

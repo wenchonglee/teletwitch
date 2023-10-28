@@ -11,13 +11,9 @@ export const db = drizzle(client);
 export const handle: Handle = async ({ event, resolve }) => {
   const auth_cookie = event.cookies.get("telegram_auth");
 
-  if (event.url.pathname === "/api/login") {
+  if (["/api/login", "/faq"].includes(event.url.pathname)) {
     const response = await resolve(event);
     return response;
-  }
-
-  if (!auth_cookie) {
-    throw error(403, "Cookie not presnt");
   }
 
   const result = checkCookie(auth_cookie);

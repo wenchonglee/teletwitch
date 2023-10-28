@@ -1,85 +1,118 @@
 <script lang="ts">
+  import EmoteCarousel from "$lib/components/EmoteCarousel.svelte";
   import type { PageData } from "./$types";
+  import Hero from "./Hero.svelte";
 
   export let data: PageData;
-  let stickerSetName = "";
+  const emotes = [
+    { src: "https://cdn.7tv.app/emote/62f1f34b1de84f086742bbf4/2x.webp", alt: "jigglin" },
+    { src: "https://cdn.7tv.app/emote/617f15a5b0bfad9428970713/2x.webp", alt: "WIGGLE" },
+    { src: "https://cdn.7tv.app/emote/60c0d373ff4047301e860e09/2x.webp", alt: "KEKWiggle" },
+    { src: "https://cdn.7tv.app/emote/64ee0aed1fb60a456607eab1/2x.webp", alt: "owoWiggle" },
+    { src: "https://cdn.7tv.app/emote/6257e5450017a3216caea5f0/2x.webp", alt: "Wiggle" },
+    { src: "https://cdn.7tv.app/emote/61ffea29a5c9454acb3a3f93/2x.webp", alt: "guraWiggle" },
+    { src: "https://cdn.7tv.app/emote/6102c9afa57eeb23c0e3e76c/2x.webp", alt: "BIGFROGQUICK" },
+  ];
 </script>
 
 <main>
-  <div class="container">
-    <h1>Teletwitch</h1>
-    <div class="subtext">Convert 3rd party Twitch emotes to Telegram stickers</div>
-    <div class="emotes">
-      <img src="https://cdn.7tv.app/emote/62f1f34b1de84f086742bbf4/2x.webp" alt="jigglin" />
-      <img src="https://cdn.7tv.app/emote/617f15a5b0bfad9428970713/2x.webp" alt="WIGGLE" />
-      <img src="https://cdn.7tv.app/emote/60c0d373ff4047301e860e09/2x.webp" alt="KEKWiggle" />
-      <img src="https://cdn.7tv.app/emote/64ee0aed1fb60a456607eab1/2x.webp" alt="owoWiggle" />
-      <img src="https://cdn.7tv.app/emote/6257e5450017a3216caea5f0/2x.webp" alt="Wiggle" />
-      <img src="https://cdn.7tv.app/emote/61ffea29a5c9454acb3a3f93/2x.webp" alt="guraWiggle" />
-      <img src="https://cdn.7tv.app/emote/6102c9afa57eeb23c0e3e76c/2x.webp" alt="BIGFROGQUICK" />
+  {#if data.userId === undefined}
+    <Hero />
+  {:else}
+    <div class="container">
+      <a class="new-sticker-set" href="/sticker-sets/new">
+        <div>Create sticker set</div>
+
+        <EmoteCarousel {emotes} width={320} />
+      </a>
+
+      <div class="list-title">Your sticker sets</div>
+      <div class="sticker-set-grid">
+        {#each data.stickerSets as stickerSet}
+          <a class="sticker-set" href={`/sticker-sets/${stickerSet.title}`}>
+            <div class="sticker-set-title">
+              {stickerSet.title}
+            </div>
+            <div class="sticker-set-format">
+              {stickerSet.format}
+            </div>
+          </a>
+        {/each}
+      </div>
     </div>
-
-    {#if data.userId === undefined}
-      Log in to Telegram to start
-    {:else}
-      {data.userId}
-      <!-- 
-        Create new sticker-set button
-       -->
-
-      <!-- 
-        List of sticker-sets that the user owns
-        -- [ Sticker-set name ]
-        -- [ Created/last updated? ]
-        -- [ 4 or 5 stickers by last updated ]
-        -- [ ]
-       -->
-      <a href="/sticker-sets/new">Create a new sticker set</a>
-
-      <br />
-      <br />
-      <br />
-      <input bind:value={stickerSetName} placeholder="Enter sticker set name" />
-
-      {#if stickerSetName !== ""}
-        <a href={`/sticker-sets/${stickerSetName}`}>Update a sticker set</a>
-      {/if}
-    {/if}
-    <script
-      async
-      src="https://telegram.org/js/telegram-widget.js?22"
-      data-telegram-login="teletwitchsticker_bot"
-      data-size="large"
-      data-userpic="false"
-      data-auth-url="/api/login"
-    ></script>
-  </div>
+  {/if}
 </main>
 
 <style>
   main {
     padding: var(--size-10);
     display: flex;
+    max-width: 1280px;
+    margin: 0 auto;
+    transition: padding 200ms;
   }
 
-  .subtext {
-    color: var(--gray-5);
-    font-size: var(--font-size-1);
+  @media (max-width: 768px) {
+    main {
+      padding: var(--size-3);
+    }
   }
 
-  .emotes {
+  .container {
     display: flex;
-    gap: var(--size-4);
-    margin-top: var(--size-2);
-    margin-bottom: var(--size-4);
+    flex-direction: column;
+    gap: var(--size-2);
   }
 
-  img {
+  a.new-sticker-set {
+    font-size: var(--font-size-4);
+    border-radius: var(--radius-3);
+    background-color: var(--gray-11);
+    color: white;
+    padding: var(--size-5);
+    border: 2px solid transparent;
+    transition: transform 200ms;
+  }
+
+  a.new-sticker-set:hover {
+    text-decoration: none;
+    border: 2px solid var(--orange-6);
+    transform: scale(1.05);
+  }
+
+  .list-title {
+    margin-top: var(--size-8);
+    font-size: var(--font-size-3);
+    font-weight: var(--font-weight-5);
+  }
+
+  .sticker-set-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--size-3);
+  }
+
+  a.sticker-set {
+    color: white;
     border-radius: var(--size-2);
-    height: 64px;
+    padding: 12px;
+    border: 2px solid transparent;
+    background-color: var(--gray-11);
+    transition: transform 200ms;
   }
 
-  a {
-    font-size: var(--font-size-5);
+  a.sticker-set:hover {
+    text-decoration: none;
+    border: 2px solid var(--orange-6);
+    transform: scale(1.05);
+  }
+
+  .sticker-set-title {
+    font-weight: 500;
+  }
+
+  .sticker-set-format {
+    color: var(--gray-6);
+    font-size: var(--font-size-0);
   }
 </style>
