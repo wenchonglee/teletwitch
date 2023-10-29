@@ -8,7 +8,8 @@
       <ul>
         <li>You are the only one who can modify it</li>
         <li>
-          You can freely modify the sticker set with <a href="https://telegram.me/stickers">@Stickers</a> bot yourself
+          You can freely modify the sticker set with <a href="https://telegram.me/stickers">@Stickers bot</a> yourself
+          <br />(but you shouldn't, read more below)
         </li>
       </ul>
       <br />
@@ -24,14 +25,23 @@
         <code>256KB</code>
       </li>
       <li>
-        Even though you can do so, you should&nbsp;<strong>not</strong> modify your Teletwitch sticker set outside of Teletwitch.
-        Sticker sets created here are not synchronized with Telegram and assumes all modifications are made here
+        Unless an unexpected error occurred on Teletwitch, you should&nbsp;<strong>not</strong> modify your sticker sets
+        outside of Teletwitch. Sticker sets created here are not synchronized with Telegram and all modifications are assumed
+        to be made here
       </li>
       <li>
         Creating stickers may be slow because Teletwitch uses free resources and must always interface with Telegram
         APIs
       </li>
     </ul>
+    <div class="section-head">My stickers are out of sync</div>
+    <div>
+      As above, this is a hobby project that uses free resources; there are some points of failure that Teletwitch makes
+      no effort in recovering from. (e.g. I would need to introduce a message queue for more resilience) <br /><br />
+      In most cases, you should be able to recover by manually removing stickers using
+      <a href="https://telegram.me/stickers">@Stickers bot</a>. You can also report issues or make requests on the
+      <a href="https://github.com/wenchonglee/teletwitch/issues" target="_blank" title="Source">Github issue board</a>.
+    </div>
   </div>
 </main>
 

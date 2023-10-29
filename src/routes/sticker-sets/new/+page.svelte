@@ -1,17 +1,19 @@
 <script lang="ts">
+  import Radio from "$lib/components/Radio.svelte";
+  import TabItem from "$lib/components/TabItem.svelte";
+  import Tabs from "$lib/components/Tabs.svelte";
+  import TextInput from "$lib/components/TextInput.svelte";
+  import IconMovie from "$lib/icons/IconMovie.svelte";
+  import IconPhotoFilled from "$lib/icons/IconPhotoFilled.svelte";
   import EmoteGrid7tv from "../EmoteGrid7tv.svelte";
   import { selectedSticker, stickerFormat } from "../store";
-  import type { PageData } from "./$types";
 
-  export let data: PageData;
-
-  let current = "empty";
+  let current = "";
 
   async function submit(e: SubmitEvent) {
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     formData.set("providerUrl", $selectedSticker.url);
     formData.set("emote", $selectedSticker.emote);
-
     const response = await fetch("/api/sticker-sets", {
       method: "POST",
       body: formData,
@@ -28,39 +30,77 @@
   }
 </script>
 
-<form on:submit|preventDefault={submit} class="form">
-  Your userid: {data.userId}
-  <div class="grid w-full max-w-sm items-center gap-1.5">
-    <label for="title">Sticker set title</label>
-    <input required name="title" value="test5" />
-  </div>
+<main>
+  <form on:submit|preventDefault={submit} class="form">
+    <TextInput label="Sticker set title" name="title" placeholder="e.g. Pepe" required />
 
-  <div>
-    <input type="radio" id="video" name="format" value="video" bind:group={$stickerFormat} />
-    <label for="video">Video</label>
-  </div>
+    <div class="radio-container">
+      <Radio name="format" label="Static" value="static" bind:selected={$stickerFormat}>
+        <IconPhotoFilled />
+      </Radio>
+      <Radio name="format" label="Video" value="video" bind:selected={$stickerFormat}>
+        <IconMovie />
+      </Radio>
+    </div>
 
-  <div>
-    <input type="radio" id="static" name="format" value="static" bind:group={$stickerFormat} />
-    <label for="static">Static</label>
-  </div>
+    <Tabs
+      defaultOption="teletwitch"
+      options={[
+        { value: "teletwitch", label: "Teletwitch" },
+        { value: "7tv", label: "7TV" },
+      ]}
+    >
+      <TabItem value="teletwitch">
+        <p>Work in progress</p>
+      </TabItem>
+      <TabItem value="7tv">
+        <EmoteGrid7tv />
+      </TabItem>
+    </Tabs>
 
-  <div class="grid w-full max-w-sm items-center gap-1.5">
-    <label for="emoji">Associated emoji (delimited by comma)</label>
-    <input required name="emoji" value="🤣" />
-  </div>
+    <TextInput label="Associated emoji" name="emoji" placeholder="Windows + ." required />
 
-  <button> Create </button>
+    <button> Create sticker set</button>
 
-  <EmoteGrid7tv />
-
-  <p>{current}</p>
-</form>
+    <p>{current}</p>
+  </form>
+</main>
 
 <style>
+  main {
+    padding-inline: var(--size-10);
+    max-width: 1280px;
+    margin: 0 auto;
+    transition: padding 200ms;
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding-inline: var(--size-3);
+    }
+  }
+
   .form {
     display: grid;
     padding: var(--size-4);
-    gap: var(--size-2);
+    gap: var(--size-3);
+  }
+
+  .radio-container {
+    display: flex;
+    gap: var(--size-3);
+  }
+
+  button {
+    background-color: var(--gray-11);
+    border-radius: var(--radius-3);
+    padding: var(--size-2);
+    border: 2px solid transparent;
+    transition: transform 200ms, border 200ms ease-in;
+  }
+
+  button:hover {
+    border: 2px solid var(--orange-6);
+    transform: scale(1.05);
   }
 </style>

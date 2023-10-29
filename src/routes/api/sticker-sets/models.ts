@@ -5,7 +5,7 @@ const PostSchema = z.object({
   providerUrl: z.string().min(1, "providerUrl required"),
   emoji: z.preprocess((val) => {
     if (typeof val === "string") {
-      return val.split(",");
+      return Array.from(val);
     }
   }, z.string().emoji().array().nonempty("emoji required")),
   // telegram name is max 64 chars

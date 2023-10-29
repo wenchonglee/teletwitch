@@ -33,7 +33,7 @@
             <div class="sticker-set-title">
               {stickerSet.title}
             </div>
-            <div class="sticker-set-format">
+            <div class="subtext">
               {stickerSet.format}
             </div>
           </a>
@@ -45,16 +45,17 @@
 
 <style>
   main {
-    padding: var(--size-10);
+    padding-inline: var(--size-10);
     display: flex;
     max-width: 1280px;
+    justify-content: center;
     margin: 0 auto;
     transition: padding 200ms;
   }
 
   @media (max-width: 768px) {
     main {
-      padding: var(--size-3);
+      padding-inline: var(--size-3);
     }
   }
 
@@ -111,7 +112,7 @@
     font-weight: 500;
   }
 
-  .sticker-set-format {
+  .subtext {
     color: var(--gray-6);
     font-size: var(--font-size-0);
   }

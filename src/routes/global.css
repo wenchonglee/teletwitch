@@ -5,3 +5,10 @@ html {
   --font-sans: "Inter", Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, Segoe UI, Roboto, Ubuntu, Cantarell,
     Noto Sans, sans-serif;
 }
+:where(:not(:active):focus-visible) {
+  outline-offset: unset;
+}
+
+:focus-visible {
+  outline: 2px solid var(--orange-6);
+}
