@@ -15,6 +15,10 @@
   ];
 </script>
 
+<svelte:head>
+  <title>Teletwitch</title>
+  <meta name="description" content="Create Telegram stickers from Twitch emotes" />
+</svelte:head>
 <main>
   {#if data.userId === undefined}
     <Hero />

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
-  import { fetch7tvEmotes } from "./fetchEmotes";
+  import { fetchTTEmotes } from "./fetchEmotes";
   import { selectedSticker, stickerFormat } from "./store";
 
-  let promise = fetch7tvEmotes("", $stickerFormat === "video");
+  let promise = fetchTTEmotes("", $stickerFormat === "video");
 
   stickerFormat.subscribe((run) => {
-    promise = fetch7tvEmotes("", $stickerFormat === "video");
+    promise = fetchTTEmotes("", $stickerFormat === "video");
   });
 
   let timeoutId: ReturnType<typeof setTimeout>;
@@ -15,7 +15,7 @@
     clearTimeout(timeoutId);
 
     timeoutId = setTimeout(function () {
-      promise = fetch7tvEmotes(currentTarget.value, $stickerFormat === "video");
+      promise = fetchTTEmotes(currentTarget.value, $stickerFormat === "video");
     }, 300);
   };
 
@@ -30,20 +30,18 @@
     {#await promise}
       <p>waiting...</p>
     {:then data}
-      {#if data !== null}
-        {#each data.emotes.items as { name, host }}
-          <button
-            type="button"
-            class="emote-container"
-            data-selected={String($selectedSticker.url === `https:${host.url}/2x.webp`)}
-            on:click={() => selectedSticker.set({ url: `https:${host.url}/2x.webp`, emote: name })}
-            title={name}
-          >
-            <img src={`https:${host.url}/2x.webp`} alt={name} title={name} />
-            <span class="emote-name">{name}</span>
-          </button>
-        {/each}
-      {/if}
+      {#each data as emote}
+        <button
+          type="button"
+          class="emote-container"
+          data-selected={String($selectedSticker.url === emote.file_id)}
+          on:click={() => selectedSticker.set({ url: emote.file_id ?? "", emote: emote.provider_emote ?? "" })}
+          title={emote.provider_emote}
+        >
+          <!-- <img src={`https:${host.url}/2x.webp`} alt={name} title={name} /> -->
+          <span class="emote-name">{emote.provider_emote}</span>
+        </button>
+      {/each}
     {:catch err}
       <p>{err}</p>
     {/await}
@@ -78,12 +76,12 @@
     border: var(--border-size-2) solid var(--orange-6);
   }
 
-  .emote-container img {
+  /* .emote-container img {
     height: 56px;
     width: 56px;
     object-fit: contain;
     text-align: center;
-  }
+  } */
 
   .emote-name {
     display: -webkit-box;

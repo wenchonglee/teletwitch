@@ -30,6 +30,9 @@
   }
 </script>
 
+<svelte:head>
+  <title>New stickerset | Teletwitch</title>
+</svelte:head>
 <main>
   <form on:submit|preventDefault={submit} class="form">
     <TextInput label="Sticker set title" name="title" placeholder="e.g. Pepe" required />
@@ -51,7 +54,8 @@
       ]}
     >
       <TabItem value="teletwitch">
-        <p>Work in progress</p>
+        WORK IN PROGRESS
+        <!-- <EmoteGridTt /> -->
       </TabItem>
       <TabItem value="7tv">
         <EmoteGrid7tv />

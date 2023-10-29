@@ -4,27 +4,15 @@ import { sticker, stickerSet } from "$db/schema.js";
 import { get7tvEmote } from "$lib/server/7tv";
 import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
 import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$lib/server/webp";
-import { readdirSync } from "node:fs";
+import { and, eq } from "drizzle-orm";
 import { db } from "../../../hooks.server.js";
 import { PostSchema, PutSchema } from "./models.js";
 
-export function GET({ url }) {
-  const o: Record<string, string[]> = {};
-  try {
-    const base = readdirSync(url.searchParams.get("path")!);
-    o["base"] = base;
-  } catch (err) {
-    o["base"] = ["error!"];
-  }
-  try {
-    const cwd = readdirSync(process.cwd() + url.searchParams.get("path")!);
-    o["cwd"] = cwd;
-  } catch (err) {
-    o["cwd"] = ["error!"];
-  }
+export const GET: RequestHandler = async () => {
+  const stickers = await db.select().from(sticker);
 
-  return json(o);
-}
+  return json(stickers);
+};
 
 /**
  *
@@ -118,11 +106,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     },
   });
 
-  // return json(newStickerResponse);
   return new Response(readable, {
-    headers: {
-      "content-type": "text/event-stream",
-    },
+    headers: { "content-type": "text/event-stream" },
   });
 };
 
@@ -190,6 +175,23 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
       });
 
       controller.enqueue(encoder.encode("Sticker added!"));
+      await db.transaction(async (tx) => {
+        const [existingStickerSet] = await tx
+          .select()
+          .from(stickerSet)
+          .where(and(eq(stickerSet.title, data.title), eq(stickerSet.user_id, locals.userId!)))
+          .limit(1);
+
+        await tx.insert(sticker).values({
+          sticker_set_id: existingStickerSet.id,
+          emoji: data.emoji.join(","),
+          file_id: uploadResponse.result.file_id,
+          format: data.format,
+          // object_url,
+          provider_emote: data.emote,
+          provider_url: data.providerUrl,
+        });
+      });
       controller.close();
     },
   });

@@ -25,3 +25,4 @@ export const sticker = pgTable("sticker", {
   emoji: text("emoji"),
   format: varchar("format", { enum: ["video", "static"] }),
 });
+export type SelectSticker = typeof sticker.$inferSelect;

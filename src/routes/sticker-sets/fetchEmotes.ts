@@ -1,4 +1,6 @@
-import { request, gql } from "graphql-request";
+import type { SelectSticker } from "$db/schema";
+import axios from "axios";
+import { gql, request } from "graphql-request";
 
 type Emote = {
   count: number;
@@ -58,4 +60,10 @@ const fetch7tvEmotes = async (query: string = "", animated: boolean = true) => {
   }
 };
 
-export { fetch7tvEmotes };
+const fetchTTEmotes = async (query: string = "", animated: boolean = true) => {
+  const response = await axios.get<SelectSticker[]>("/api/sticker-sets");
+
+  return response.data;
+};
+
+export { fetch7tvEmotes, fetchTTEmotes };
