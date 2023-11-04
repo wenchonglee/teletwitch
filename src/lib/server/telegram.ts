@@ -1,9 +1,9 @@
-import { BOT_TOKEN } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import axios from "axios";
 import { createReadStream } from "node:fs";
 
 const tgAxios = axios.create({
-  baseURL: `https://api.telegram.org/bot${BOT_TOKEN}`,
+  baseURL: `https://api.telegram.org/bot${env["BOT_TOKEN"]}`,
 });
 
 type UploadStickerFileResponse = {

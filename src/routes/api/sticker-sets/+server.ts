@@ -3,7 +3,7 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { sticker, stickerSet } from "$db/schema.js";
 import { get7tvEmote } from "$lib/server/7tv";
 import { addStickerToSet, createNewStickerSet, uploadStickerFile } from "$lib/server/telegram";
-import { cleanup, convertFramesToWebm, convertWebpToFrames, resizeWebp } from "$lib/server/webp";
+import { cleanup, convertFramesToWebm, convertWebpToFrames, mkTmpdir, resizeWebp } from "$lib/server/webp";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../../hooks.server.js";
 import { PostSchema, PutSchema } from "./models.js";
@@ -35,28 +35,27 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
   const readable = new ReadableStream({
     async start(controller) {
-      const tempName = Date.now().toString();
+      const epoch = Date.now().toString();
+      mkTmpdir(epoch);
 
       controller.enqueue(encoder.encode("Retrieving emote"));
       const emote = await get7tvEmote(data.providerUrl);
 
       controller.enqueue(encoder.encode("Resizing emote"));
-      const resizedWebpFileName = await resizeWebp(tempName, emote);
+      const resizedWebpFileName = await resizeWebp(epoch, emote);
 
       let filePath = resizedWebpFileName;
 
       if (data.format === "video") {
         controller.enqueue(encoder.encode("Slicing emote into image frames"));
-        await convertWebpToFrames(tempName, resizedWebpFileName);
+        await convertWebpToFrames(epoch, resizedWebpFileName);
 
         controller.enqueue(encoder.encode("Stitching image frames into webm video"));
-        filePath = await convertFramesToWebm(tempName);
+        filePath = await convertFramesToWebm(epoch);
 
         // todo: do we need still need this arbitrary wait?
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
-
-      await cleanup(tempName);
 
       controller.enqueue(encoder.encode("Uploading sticker file to Telegram"));
       const uploadResponse = await uploadStickerFile({
@@ -64,6 +63,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         format: data.format,
         userId: locals.userId!,
       });
+      await cleanup(epoch);
 
       if (!uploadResponse || !uploadResponse.ok) {
         throw error(500, { message: "Upload to telegram failed" });
@@ -131,28 +131,27 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 
   const readable = new ReadableStream({
     async start(controller) {
-      const tempName = Date.now().toString();
+      const epoch = Date.now().toString();
+      mkTmpdir(epoch);
 
       controller.enqueue(encoder.encode("Retrieving emote"));
       const emote = await get7tvEmote(data.providerUrl);
 
       controller.enqueue(encoder.encode("Resizing emote"));
-      const resizedWebpFileName = await resizeWebp(tempName, emote);
+      const resizedWebpFileName = await resizeWebp(epoch, emote);
 
       let filePath = resizedWebpFileName;
 
       if (data.format === "video") {
         controller.enqueue(encoder.encode("Slicing emote into image frames"));
-        await convertWebpToFrames(tempName, resizedWebpFileName);
+        await convertWebpToFrames(epoch, resizedWebpFileName);
 
         controller.enqueue(encoder.encode("Stitching image frames into webm video"));
-        filePath = await convertFramesToWebm(tempName);
+        filePath = await convertFramesToWebm(epoch);
 
         // todo: do we need still need this arbitrary wait?
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
-
-      await cleanup(tempName);
 
       controller.enqueue(encoder.encode("Uploading sticker file to Telegram"));
       const uploadResponse = await uploadStickerFile({
@@ -160,6 +159,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
         format: data.format,
         userId: locals.userId!,
       });
+      await cleanup(epoch);
 
       if (!uploadResponse || !uploadResponse.ok) {
         throw error(500, { message: "Upload to telegram failed" });

@@ -1,21 +1,22 @@
-import sharp from "sharp";
-import util from "node:util";
-import { exec as baseExec } from "node:child_process";
 import { path } from "@ffmpeg-installer/ffmpeg";
 import ffmpeg from "fluent-ffmpeg";
+import { exec as baseExec } from "node:child_process";
+import { mkdirSync, rmSync } from "node:fs";
 import { platform, tmpdir } from "node:os";
+import util from "node:util";
+import sharp from "sharp";
 
 ffmpeg.setFfmpegPath(path);
 const exec = util.promisify(baseExec);
-const tmp = tmpdir();
+const tmp = import.meta.env["DEV"] ? "tmp" : tmpdir();
 
 /**
  *
  * Resize the given image to at least 512 on 1 side
  *
  */
-const resizeWebp = async (tempName: string, emote: ArrayBuffer) => {
-  const fileName = `${tmp}/${tempName}.webp`;
+const resizeWebp = async (epoch: string, emote: ArrayBuffer) => {
+  const fileName = `${tmp}/${epoch}/tmp.webp`;
 
   // TODO: determine if the file is animated and longer than 3seconds
   await sharp(emote, { animated: true }).resize(512).toFile(fileName);
@@ -27,11 +28,11 @@ const resizeWebp = async (tempName: string, emote: ArrayBuffer) => {
  * Slice the animated webp into png files
  *
  */
-const convertWebpToFrames = async (prefix: string, webpFileName: string) => {
-  const path = import.meta.env["DEV"] ? "./bin" : "./vercel/path0/.svelte-kit/output/server/bin";
+const convertWebpToFrames = async (epoch: string, webpFileName: string) => {
+  const path = import.meta.env["DEV"] ? "./bin" : "/app/bin";
   const binary = platform() === "win32" ? "anim_dump.exe" : "anim_dump";
 
-  await exec(`"${path}/${binary}" -folder ${tmp} -prefix ${prefix}_ ${webpFileName}`);
+  await exec(`"${path}/${binary}" -folder ${tmp}/${epoch} -prefix frame_ ${webpFileName}`);
 };
 
 //
@@ -40,22 +41,33 @@ const convertWebpToFrames = async (prefix: string, webpFileName: string) => {
  * Convert the sliced png files to a webm file
  *
  */
-const convertFramesToWebm = async (fileName: string) => {
-  const webmFileName = `${tmp}/${fileName}.webm`;
+const convertFramesToWebm = async (epoch: string) => {
+  const webmFileName = `${tmp}/${epoch}/out.webm`;
 
   // TODO: resulting size must be below 256KB
-  ffmpeg(`${tmp}/${fileName}_%04d.png`)
+  ffmpeg(`${tmp}/${epoch}/frame_%04d.png`)
     //   .outputOptions(["-crf", "63"])
     .save(webmFileName);
 
   return webmFileName;
 };
 
+/**
+ * TODO: refactor this
+ */
+const mkTmpdir = (epoch: string) => {
+  mkdirSync(`${tmp}/${epoch}`);
+};
+
 // TODO: cleanup all files
-const cleanup = async (tempName: string) => {
+const cleanup = async (epoch: string) => {
+  rmSync(`${tmp}/${epoch}`, {
+    force: true,
+    recursive: true,
+  });
   // resized webp
   // sliced pngs
   // created webm
 };
 
-export { convertFramesToWebm, convertWebpToFrames, cleanup, resizeWebp };
+export { cleanup, convertFramesToWebm, convertWebpToFrames, mkTmpdir, resizeWebp };
