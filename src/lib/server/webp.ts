@@ -56,6 +56,7 @@ export const convertFramesToWebm = async (epoch: string) => {
  */
 export const mkTmpdir = (epoch: string) => {
   mkdirSync(`${tmp}/${epoch}`);
+  return `${tmp}/${epoch}`;
 };
 
 // TODO: cleanup all files

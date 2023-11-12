@@ -29,60 +29,65 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const readable = new ReadableStream({
     async start(controller) {
       const updateClient = (msg: string) => controller.enqueue(encoder.encode(msg));
-      const { bucketPath, localFilePath, epoch } = await getObject(data, updateClient);
+      try {
+        const { bucketPath, localFilePath, epoch } = await getObject(data, updateClient);
 
-      /**
-       *
-       * Upload to Telegram & insert to table in a transaction
-       *
-       */
-      controller.enqueue(encoder.encode("Uploading sticker file to Telegram"));
-      await db.transaction(async (tx) => {
-        const uploadResponse = await uploadStickerFile({
-          filePath: localFilePath,
-          format: data.format,
-          userId: locals.userId!,
-        });
-        if (!uploadResponse || !uploadResponse.ok) {
-          // TODO: ensure that transaction rolls back
-          throw error(500, { message: "Upload to telegram failed" });
-        }
+        /**
+         *
+         * Upload to Telegram & insert to table in a transaction
+         *
+         */
+        updateClient("Uploading sticker file to Telegram");
+        await db.transaction(async (tx) => {
+          const uploadResponse = await uploadStickerFile({
+            localFilePath,
+            format: data.format,
+            userId: locals.userId!,
+          });
+          if (!uploadResponse || !uploadResponse.ok) {
+            // TODO: ensure that transaction rolls back
+            throw error(500, { message: "Upload to telegram failed" });
+          }
 
-        const [createdStickerSet] = await tx
-          .insert(stickerSet)
-          .values({
+          const [createdStickerSet] = await tx
+            .insert(stickerSet)
+            .values({
+              format: data.format,
+              title: data.title,
+              user_id: locals.userId!,
+            })
+            .returning();
+
+          await tx.insert(sticker).values({
+            sticker_set_id: createdStickerSet.id,
+            emoji: data.emoji.join(","),
+            file_path: bucketPath,
+            file_id: uploadResponse.result.file_id,
+          });
+
+          // https://github.com/sveltejs/kit/issues/5344
+          updateClient("Creating stickerset on Telegram");
+          const newStickerResponse = await createNewStickerSet({
+            stickerFileId: uploadResponse.result.file_id,
+            emoji: data.emoji,
+            name: `${data.title}_by_teletwitchsticker_bot`,
             format: data.format,
             title: data.title,
-            user_id: locals.userId!,
-          })
-          .returning();
+            userId: locals.userId!,
+          });
 
-        await tx.insert(sticker).values({
-          sticker_set_id: createdStickerSet.id,
-          emoji: data.emoji.join(","),
-          file_path: bucketPath,
-          file_id: uploadResponse.result.file_id,
+          // TODO: ensure that transaction rolls back if API call fails
+          if (newStickerResponse === null) {
+            throw error(500, { message: "Upload to telegram failed" });
+          }
         });
 
-        // https://github.com/sveltejs/kit/issues/5344
-        controller.enqueue(encoder.encode("Creating stickerset on Telegram"));
-        const newStickerResponse = await createNewStickerSet({
-          stickerFileId: uploadResponse.result.file_id,
-          emoji: data.emoji,
-          name: `${data.title}_by_teletwitchsticker_bot`,
-          format: data.format,
-          title: data.title,
-          userId: locals.userId!,
-        });
-
-        // TODO: ensure that transaction rolls back if API call fails
-        if (newStickerResponse === null) {
-          throw error(500, { message: "Upload to telegram failed" });
-        }
-      });
-      await cleanup(epoch);
-
-      controller.enqueue(encoder.encode("Stickerset created!"));
+        await cleanup(epoch);
+        updateClient("Stickerset created!");
+      } catch (err) {
+        console.log(err);
+        updateClient("Something went wrong!");
+      }
       controller.close();
     },
   });

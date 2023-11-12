@@ -28,8 +28,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
   const readable = new ReadableStream({
     async start(controller) {
+      const updateClient = (msg: string) => controller.enqueue(encoder.encode(msg));
       try {
-        const updateClient = (msg: string) => controller.enqueue(encoder.encode(msg));
         const { bucketPath, localFilePath, epoch } = await getObject(data, updateClient);
 
         /**
@@ -37,10 +37,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
          * Upload to Telegram & insert to table in a transaction
          *
          */
-        controller.enqueue(encoder.encode("Uploading sticker file to Telegram"));
+        updateClient("Uploading sticker file to Telegram");
         await db.transaction(async (tx) => {
           const uploadResponse = await uploadStickerFile({
-            filePath: localFilePath,
+            localFilePath,
             format: data.format,
             userId: locals.userId!,
           });
@@ -62,7 +62,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
             file_id: uploadResponse.result.file_id,
           });
 
-          controller.enqueue(encoder.encode("Adding sticker to stickerset on Telegram"));
+          updateClient("Adding sticker to stickerset on Telegram");
           const newStickerResponse = await addStickerToSet({
             stickerFileId: uploadResponse.result.file_id,
             emoji: data.emoji,
@@ -75,16 +75,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
             throw error(500, { message: "Upload to telegram failed" });
           }
         });
-        await cleanup(epoch);
 
-        controller.enqueue(encoder.encode("Sticker added!"));
-        controller.close();
+        await cleanup(epoch);
+        updateClient("Sticker added!");
       } catch (err) {
-        // if (err instanceof HttpError) {
-        //   controller.enqueue(encoder.encode(err.body.message));
-        controller.enqueue(encoder.encode("Something went wrong!"));
-        controller.close();
+        console.log(err);
+        updateClient("Something went wrong!");
       }
+
+      controller.close();
     },
   });
 

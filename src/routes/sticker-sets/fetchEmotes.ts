@@ -60,13 +60,18 @@ export const fetch7tvEmotes = async (query: string = "", animated: boolean = tru
   }
 };
 
-export const fetchTTEmotes = async (query: string = "", animated: boolean = true) => {
+export const fetchTTEmotes = async (query: string = "", animated: boolean = true): Promise<ObjectStore[]> => {
   if (!browser) {
     return [];
   }
 
-  const response = await fetch("/api/stickers");
+  const searchParams = new URLSearchParams({
+    query,
+    format: animated ? "video" : "static",
+  });
+
+  const response = await fetch(`/api/stickers?${searchParams}`);
   const data = await response.json();
 
-  return data as ObjectStore[];
+  return data;
 };

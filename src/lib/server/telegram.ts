@@ -19,20 +19,20 @@ type GenericResponse = { ok: boolean; result: boolean };
 
 type UploadStickerFileParams = {
   userId: string;
-  filePath: string;
   format: "video" | "static";
+  localFilePath: string;
 };
 
 export const uploadStickerFile = async (params: UploadStickerFileParams) => {
-  const { filePath, userId, format } = params;
-  const stream = createReadStream(filePath);
+  const { userId, format, localFilePath } = params;
+  const fileStream = createReadStream(localFilePath);
 
   try {
     const response = await tgAxios.post<UploadStickerFileResponse>(
       "/uploadStickerFile",
       {
         user_id: Number(userId),
-        sticker: stream,
+        sticker: fileStream,
         sticker_format: format,
       },
       { headers: { "Content-Type": "multipart/form-data" } }

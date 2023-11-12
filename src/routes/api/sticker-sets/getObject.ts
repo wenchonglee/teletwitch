@@ -1,9 +1,8 @@
 import { objectStore } from "$db/schema.js";
-import { env } from "$env/dynamic/public";
-import { get7tvEmote } from "$lib/server/7tv";
+import { get7tvEmote, is7tvLink } from "$lib/server/7tv";
 import { convertFramesToWebm, convertWebpToFrames, mkTmpdir, resizeWebp } from "$lib/server/webp";
 import { customAlphabet } from "nanoid";
-import { createReadStream } from "node:fs";
+import { createReadStream, writeFileSync } from "node:fs";
 import type { z } from "zod";
 import { bucket, db } from "../../../hooks.server.js";
 import type { PostSchema } from "./models.js";
@@ -12,10 +11,24 @@ const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 8);
 
 export const getObject = async (data: z.infer<typeof PostSchema>, updateClient: (msg: string) => void) => {
   const epoch = Date.now().toString();
-  mkTmpdir(epoch);
+  const tmpDir = mkTmpdir(epoch);
 
-  if (data.providerUrl.includes(env.PUBLIC_BUCKET_PATH)) {
-    // todo: check that it actually exists first
+  // todo: can be more robust
+  if (!is7tvLink(data.providerUrl)) {
+    const downloaded = await bucket.download(data.providerUrl);
+    if (!downloaded.data) {
+      throw new Error("File doesn't exist");
+    }
+
+    const buffer = Buffer.from(await downloaded.data.arrayBuffer());
+    const localFilePath = `${tmpDir}/blob`;
+    writeFileSync(localFilePath, buffer);
+
+    return {
+      localFilePath,
+      bucketPath: data.providerUrl,
+      epoch,
+    };
   }
 
   /**
@@ -44,9 +57,9 @@ export const getObject = async (data: z.infer<typeof PostSchema>, updateClient: 
    * Upload image to supabase & insert to table
    *
    */
-  const stream = createReadStream(localFilePath);
+  const fileStream = createReadStream(localFilePath);
   const bucketPath = `${nanoid()}.${data.format === "video" ? "webm" : "webp"}`;
-  const uploadedFile = await bucket.upload(bucketPath, stream, {
+  const uploadedFile = await bucket.upload(bucketPath, fileStream, {
     cacheControl: "31536000",
     duplex: "half",
     contentType: data.format === "video" ? "video/webm" : "image/webp",

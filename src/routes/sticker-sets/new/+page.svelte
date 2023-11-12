@@ -7,6 +7,7 @@
   import IconMovie from "$lib/icons/IconMovie.svelte";
   import IconPhotoFilled from "$lib/icons/IconPhotoFilled.svelte";
   import EmoteGrid7tv from "../EmoteGrid7tv.svelte";
+  import EmoteGridTt from "../EmoteGridTT.svelte";
   import { selectedSticker, stickerFormat } from "../store";
 
   let current = "";
@@ -57,8 +58,7 @@
       ]}
     >
       <TabItem value="teletwitch">
-        WORK IN PROGRESS
-        <!-- <EmoteGridTt /> -->
+        <EmoteGridTt />
       </TabItem>
       <TabItem value="7tv">
         <EmoteGrid7tv />
