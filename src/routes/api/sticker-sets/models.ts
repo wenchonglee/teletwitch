@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const PostSchema = z.object({
+export const PostSchema = z.object({
   format: z.enum(["video", "static"]),
   providerUrl: z.string().min(1, "providerUrl required"),
   emoji: z.preprocess((val) => {
@@ -13,11 +13,3 @@ const PostSchema = z.object({
   title: z.string().min(1, "title required").max(39, "title cannot be longer than 39 characters"),
   emote: z.string().min(1, "emote required"),
 });
-
-const PutSchema = PostSchema.omit({
-  // todo: remove the need to pass format
-  //   format: true,
-  //   title: true,
-});
-
-export { PostSchema, PutSchema };

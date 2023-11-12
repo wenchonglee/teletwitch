@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { env } from "$env/dynamic/public";
   import { onDestroy } from "svelte";
   import { fetchTTEmotes } from "./fetchEmotes";
   import { selectedSticker, stickerFormat } from "./store";
@@ -30,18 +31,18 @@
     {#await promise}
       <p>waiting...</p>
     {:then data}
-      <div>test</div>
-      <!-- {#each data as emote}
+      {#each data as emote}
         <button
           type="button"
           class="emote-container"
-          data-selected={String($selectedSticker.url === emote.file_id)}
-          on:click={() => selectedSticker.set({ url: emote.file_id ?? "", emote: emote.provider_emote ?? "" })}
+          data-selected={String($selectedSticker.url === emote.file_path)}
+          on:click={() => selectedSticker.set({ url: emote.file_path ?? "", emote: emote.provider_emote ?? "" })}
           title={emote.provider_emote}
         >
+          <img src={`${env["PUBLIC_BUCKET_PATH"]}/${emote.file_path}`} alt={emote.provider_emote} />
           <span class="emote-name">{emote.provider_emote}</span>
         </button>
-      {/each} -->
+      {/each}
     {:catch err}
       <p>{err}</p>
     {/await}
@@ -76,12 +77,12 @@
     border: var(--border-size-2) solid var(--orange-6);
   }
 
-  /* .emote-container img {
+  .emote-container img {
     height: 56px;
     width: 56px;
     object-fit: contain;
     text-align: center;
-  } */
+  }
 
   .emote-name {
     display: -webkit-box;

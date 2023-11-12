@@ -1,5 +1,5 @@
-import type { SelectSticker } from "$db/schema";
-import axios from "axios";
+import { browser } from "$app/environment";
+import type { ObjectStore } from "$db/schema";
 import { gql, request } from "graphql-request";
 
 type Emote = {
@@ -48,7 +48,7 @@ const search7tv = gql`
   }
 `;
 
-const fetch7tvEmotes = async (query: string = "", animated: boolean = true) => {
+export const fetch7tvEmotes = async (query: string = "", animated: boolean = true) => {
   try {
     const data = await request<Gql7tvResponse>("https://7tv.io/v3/gql", search7tv, {
       query,
@@ -60,10 +60,13 @@ const fetch7tvEmotes = async (query: string = "", animated: boolean = true) => {
   }
 };
 
-const fetchTTEmotes = async (query: string = "", animated: boolean = true) => {
-  const response = await axios.get<SelectSticker[]>("/api/sticker-sets");
+export const fetchTTEmotes = async (query: string = "", animated: boolean = true) => {
+  if (!browser) {
+    return [];
+  }
 
-  return response.data;
+  const response = await fetch("/api/stickers");
+  const data = await response.json();
+
+  return data as ObjectStore[];
 };
-
-export { fetch7tvEmotes, fetchTTEmotes };

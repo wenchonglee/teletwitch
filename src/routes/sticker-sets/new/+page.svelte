@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import Radio from "$lib/components/Radio.svelte";
   import TabItem from "$lib/components/TabItem.svelte";
   import Tabs from "$lib/components/Tabs.svelte";
@@ -23,8 +24,10 @@
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
     while (true) {
       const { value, done } = await reader.read();
-      console.log(value);
-      if (done) break;
+      if (done) {
+        goto(`/sticker-sets/${formData.get("title")}`);
+        break;
+      }
       current = value;
     }
   }

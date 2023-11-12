@@ -32,3 +32,4 @@ export const objectStore = pgTable("object_store", {
   format: varchar("format", { enum: ["video", "static"] }).notNull(),
   created_date: timestamp("created_date").defaultNow(),
 });
+export type ObjectStore = typeof objectStore.$inferSelect;

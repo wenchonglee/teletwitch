@@ -15,7 +15,7 @@ const tmp = import.meta.env["DEV"] ? "tmp" : tmpdir();
  * Resize the given image to at least 512 on 1 side
  *
  */
-const resizeWebp = async (epoch: string, emote: ArrayBuffer) => {
+export const resizeWebp = async (epoch: string, emote: ArrayBuffer) => {
   const fileName = `${tmp}/${epoch}/tmp.webp`;
 
   // TODO: determine if the file is animated and longer than 3seconds
@@ -28,20 +28,19 @@ const resizeWebp = async (epoch: string, emote: ArrayBuffer) => {
  * Slice the animated webp into png files
  *
  */
-const convertWebpToFrames = async (epoch: string, webpFileName: string) => {
+export const convertWebpToFrames = async (epoch: string, webpFileName: string) => {
   const path = import.meta.env["DEV"] ? "./bin" : "/app/bin";
   const binary = platform() === "win32" ? "anim_dump.exe" : "anim_dump";
 
   await exec(`"${path}/${binary}" -folder ${tmp}/${epoch} -prefix frame_ ${webpFileName}`);
 };
 
-//
 /**
  *
  * Convert the sliced png files to a webm file
  *
  */
-const convertFramesToWebm = async (epoch: string) => {
+export const convertFramesToWebm = async (epoch: string) => {
   const webmFileName = `${tmp}/${epoch}/out.webm`;
 
   // TODO: resulting size must be below 256KB
@@ -55,19 +54,20 @@ const convertFramesToWebm = async (epoch: string) => {
 /**
  * TODO: refactor this
  */
-const mkTmpdir = (epoch: string) => {
+export const mkTmpdir = (epoch: string) => {
   mkdirSync(`${tmp}/${epoch}`);
 };
 
 // TODO: cleanup all files
-const cleanup = async (epoch: string) => {
+/**
+ * Recursively removes all files in the tmp folder, contains:
+ * - Resized webp
+ * - (if video) Sliced png files
+ * - (if video) Created webm file
+ */
+export const cleanup = async (epoch: string) => {
   rmSync(`${tmp}/${epoch}`, {
     force: true,
     recursive: true,
   });
-  // resized webp
-  // sliced pngs
-  // created webm
 };
-
-export { cleanup, convertFramesToWebm, convertWebpToFrames, mkTmpdir, resizeWebp };

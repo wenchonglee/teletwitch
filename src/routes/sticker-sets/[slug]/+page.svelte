@@ -6,6 +6,7 @@
   import Tabs from "$lib/components/Tabs.svelte";
   import TextInput from "$lib/components/TextInput.svelte";
   import EmoteGrid7tv from "../EmoteGrid7tv.svelte";
+  import EmoteGridTt from "../EmoteGridTT.svelte";
   import { selectedSticker } from "../store";
 
   import type { PageData } from "./$types";
@@ -31,9 +32,10 @@
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
     while (true) {
       const { value, done } = await reader.read();
-      console.log(value);
-      if (done) break;
-      invalidateAll();
+      if (done) {
+        invalidateAll();
+        break;
+      }
       current = value;
     }
   }
@@ -44,6 +46,9 @@
 </svelte:head>
 <main>
   <form on:submit|preventDefault={submit} class="form">
+    <a href={`https://t.me/addstickers/${$page.params.slug}_by_teletwitchsticker_bot`} target="_blank">
+      Add sticker set to your Telegram account
+    </a>
     <div class="existing-title">Existing stickers</div>
     <div class="existing-grid">
       {#each data.result as { sticker }}
@@ -59,8 +64,7 @@
       ]}
     >
       <TabItem value="teletwitch">
-        WORK IN PROGRESS
-        <!-- <EmoteGridTt /> -->
+        <EmoteGridTt />
       </TabItem>
       <TabItem value="7tv">
         <EmoteGrid7tv />

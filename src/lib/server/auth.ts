@@ -2,7 +2,7 @@ import { env } from "$env/dynamic/private";
 import { createHash, createHmac } from "crypto";
 import { z } from "zod";
 
-const TokenSchema = z.object({
+export const TokenSchema = z.object({
   auth_date: z.string().min(1),
   first_name: z.string().min(1),
   username: z.string().min(1),
@@ -15,7 +15,7 @@ type CheckCookieReturn = { ok: true; data: Token } | { ok: false; error: string 
 /**
  * Parse and check the stored cookie string
  */
-const checkCookie = (cookieString: string | undefined): CheckCookieReturn => {
+export const checkCookie = (cookieString: string | undefined): CheckCookieReturn => {
   if (!cookieString) {
     return { ok: false, error: "Cookie not present" };
   }
@@ -38,7 +38,7 @@ const checkCookie = (cookieString: string | undefined): CheckCookieReturn => {
 /**
  * Returns true if the token is valid
  */
-const checkToken = (token: Token) => {
+export const checkToken = (token: Token) => {
   const { auth_date, first_name, hash, id, username } = token;
 
   const payload = `auth_date=${auth_date}\nfirst_name=${first_name}\nid=${id}\nusername=${username}`;
@@ -47,5 +47,3 @@ const checkToken = (token: Token) => {
 
   return hash === checkHash;
 };
-
-export { TokenSchema, checkCookie, checkToken };

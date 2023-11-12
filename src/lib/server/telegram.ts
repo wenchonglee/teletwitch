@@ -23,7 +23,7 @@ type UploadStickerFileParams = {
   format: "video" | "static";
 };
 
-const uploadStickerFile = async (params: UploadStickerFileParams) => {
+export const uploadStickerFile = async (params: UploadStickerFileParams) => {
   const { filePath, userId, format } = params;
   const stream = createReadStream(filePath);
 
@@ -55,7 +55,7 @@ type CreateNewStickerSetParams = {
   format: "video" | "static";
 };
 
-const createNewStickerSet = async (params: CreateNewStickerSetParams) => {
+export const createNewStickerSet = async (params: CreateNewStickerSetParams) => {
   const { userId, name, title, emoji, stickerFileId, format } = params;
 
   try {
@@ -87,7 +87,7 @@ type AddStickerToSetParams = {
   emoji: string[];
 };
 
-const addStickerToSet = async (params: AddStickerToSetParams) => {
+export const addStickerToSet = async (params: AddStickerToSetParams) => {
   const { userId, name, emoji, stickerFileId } = params;
 
   try {
@@ -106,5 +106,3 @@ const addStickerToSet = async (params: AddStickerToSetParams) => {
     return null;
   }
 };
-
-export { addStickerToSet, createNewStickerSet, tgAxios, uploadStickerFile };

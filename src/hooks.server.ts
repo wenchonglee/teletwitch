@@ -1,7 +1,7 @@
 import { env } from "$env/dynamic/private";
 import { checkCookie } from "$lib/server/auth";
 import { StorageClient } from "@supabase/storage-js";
-import { error, type Handle, type HandleServerError } from "@sveltejs/kit";
+import { error, type Handle } from "@sveltejs/kit";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -36,11 +36,4 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   const response = await resolve(event);
   return response;
-};
-
-export const handleError: HandleServerError = ({ error, event }) => {
-  return {
-    message: "Whoops!",
-    code: "UNKNOWN",
-  };
 };
