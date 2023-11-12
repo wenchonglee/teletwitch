@@ -1,12 +1,23 @@
 import { env } from "$env/dynamic/private";
 import { checkCookie } from "$lib/server/auth";
-import { error, type Handle } from "@sveltejs/kit";
+import { StorageClient } from "@supabase/storage-js";
+import { error, type Handle, type HandleServerError } from "@sveltejs/kit";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 const connectionString = env["CONNECTION_STRING"];
-const client = postgres(connectionString);
+const client = postgres(connectionString, {
+  prepare: false,
+});
 export const db = drizzle(client);
+
+const STORAGE_URL = env["STORAGE_URL"];
+const SERVICE_KEY = env["SERVICE_KEY"];
+const storageClient = new StorageClient(STORAGE_URL, {
+  apikey: SERVICE_KEY,
+  Authorization: `Bearer ${SERVICE_KEY}`,
+});
+export const bucket = storageClient.from("teletwitch");
 
 export const handle: Handle = async ({ event, resolve }) => {
   const auth_cookie = event.cookies.get("telegram_auth");
@@ -25,4 +36,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   const response = await resolve(event);
   return response;
+};
+
+export const handleError: HandleServerError = ({ error, event }) => {
+  return {
+    message: "Whoops!",
+    code: "UNKNOWN",
+  };
 };

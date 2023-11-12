@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { invalidateAll } from "$app/navigation";
   import { page } from "$app/stores";
+  import { env } from "$env/dynamic/public";
   import TabItem from "$lib/components/TabItem.svelte";
   import Tabs from "$lib/components/Tabs.svelte";
   import TextInput from "$lib/components/TextInput.svelte";
@@ -20,8 +22,8 @@
     formData.set("emote", $selectedSticker.emote);
     formData.set("title", $page.params.slug);
     formData.set("format", data.format);
-    const response = await fetch("/api/sticker-sets", {
-      method: "PUT",
+    const response = await fetch(`/api/sticker-sets/${$page.params.slug}`, {
+      method: "POST",
       body: formData,
     });
     if (!response.body) return;
@@ -31,6 +33,7 @@
       const { value, done } = await reader.read();
       console.log(value);
       if (done) break;
+      invalidateAll();
       current = value;
     }
   }
@@ -44,9 +47,7 @@
     <div class="existing-title">Existing stickers</div>
     <div class="existing-grid">
       {#each data.result as { sticker }}
-        <div>
-          {sticker?.provider_emote}
-        </div>
+        <img src={`${env["PUBLIC_BUCKET_PATH"]}/${sticker?.file_path}`} alt={sticker?.emoji} width={32} height={32} />
       {/each}
     </div>
 

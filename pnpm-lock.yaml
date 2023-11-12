@@ -13,6 +13,9 @@ dependencies:
   '@ffmpeg-installer/ffmpeg':
     specifier: 1.1.0
     version: 1.1.0
+  '@supabase/storage-js':
+    specifier: 2.5.4
+    version: 2.5.4
   '@sveltejs/adapter-node':
     specifier: 1.3.1
     version: 1.3.1(@sveltejs/kit@1.25.2)
@@ -34,6 +37,9 @@ dependencies:
   graphql-request:
     specifier: 6.1.0
     version: 6.1.0(graphql@16.8.1)
+  nanoid:
+    specifier: 5.0.2
+    version: 5.0.2
   open-props:
     specifier: 1.6.7
     version: 1.6.7
@@ -493,6 +499,19 @@ packages:
       estree-walker: 2.0.2
       picomatch: 2.3.1
       rollup: 3.29.4
+    dev: false
+
+  /@supabase/node-fetch@2.6.14:
+    resolution: {integrity: sha512-w/Tsd22e/5fAeoxqQ4P2MX6EyF+iM6rc9kmlMVFkHuG0rAltt2TLhFbDJfemnHbtvnazWaRfy5KnFU/SYT37dQ==}
+    engines: {node: 4.x || >=6.0.0}
+    dependencies:
+      whatwg-url: 5.0.0
+    dev: false
+
+  /@supabase/storage-js@2.5.4:
+    resolution: {integrity: sha512-yspHD19I9uQUgfTh0J94+/r/g6hnhdQmw6Y7OWqr/EbnL6uvicGV1i1UDkkmeUHqfF9Mbt2sLtuxRycYyKv2ew==}
+    dependencies:
+      '@supabase/node-fetch': 2.6.14
     dev: false
 
   /@sveltejs/adapter-node@1.3.1(@sveltejs/kit@1.25.2):
@@ -1579,6 +1598,12 @@ packages:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /nanoid@5.0.2:
+    resolution: {integrity: sha512-2ustYUX1R2rL/Br5B/FMhi8d5/QzvkJ912rBYxskcpu0myTHzSZfTr1LAS2Sm7jxRUObRrSBFoyzwAhL49aVSg==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+    dev: false
 
   /napi-build-utils@1.0.2:
     resolution: {integrity: sha512-ONmRUqK7zj7DWX0D9ADe03wbwOBZxNAfF20PlGfCWQcD3+/MakShIHrMqx9YwPTfxDdF1zLeL+RGZiR9kGMLdg==}

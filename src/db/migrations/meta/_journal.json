@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1697992111924,
-      "tag": "0000_regular_galactus",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1697992255711,
-      "tag": "0001_closed_ozymandias",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1698492718199,
-      "tag": "0002_medical_amazoness",
+      "when": 1699198183405,
+      "tag": "0000_easy_loa",
       "breakpoints": true
     }
   ]

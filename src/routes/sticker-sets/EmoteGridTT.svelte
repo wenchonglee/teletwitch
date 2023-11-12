@@ -30,7 +30,8 @@
     {#await promise}
       <p>waiting...</p>
     {:then data}
-      {#each data as emote}
+      <div>test</div>
+      <!-- {#each data as emote}
         <button
           type="button"
           class="emote-container"
@@ -38,10 +39,9 @@
           on:click={() => selectedSticker.set({ url: emote.file_id ?? "", emote: emote.provider_emote ?? "" })}
           title={emote.provider_emote}
         >
-          <!-- <img src={`https:${host.url}/2x.webp`} alt={name} title={name} /> -->
           <span class="emote-name">{emote.provider_emote}</span>
         </button>
-      {/each}
+      {/each} -->
     {:catch err}
       <p>{err}</p>
     {/await}

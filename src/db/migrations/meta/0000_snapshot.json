@@ -1,9 +1,117 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "e1fd419a-37e2-4d41-91aa-08f1a8d61787",
+  "id": "4ce4070c-2db5-428f-9a41-22c7e9099530",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "object_store": {
+      "name": "object_store",
+      "schema": "",
+      "columns": {
+        "file_path": {
+          "name": "file_path",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "provider_url": {
+          "name": "provider_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider_emote": {
+          "name": "provider_emote",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "format": {
+          "name": "format",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_date": {
+          "name": "created_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "sticker": {
+      "name": "sticker",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sticker_set_id": {
+          "name": "sticker_set_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_path": {
+          "name": "file_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_id": {
+          "name": "file_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "emoji": {
+          "name": "emoji",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sticker_sticker_set_id_sticker_set_id_fk": {
+          "name": "sticker_sticker_set_id_sticker_set_id_fk",
+          "tableFrom": "sticker",
+          "tableTo": "sticker_set",
+          "columnsFrom": [
+            "sticker_set_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sticker_file_path_object_store_file_path_fk": {
+          "name": "sticker_file_path_object_store_file_path_fk",
+          "tableFrom": "sticker",
+          "tableTo": "object_store",
+          "columnsFrom": [
+            "file_path"
+          ],
+          "columnsTo": [
+            "file_path"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "sticker_set": {
       "name": "sticker_set",
       "schema": "",
@@ -18,29 +126,37 @@
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "title": {
           "name": "title",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "format": {
           "name": "format",
           "type": "varchar",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "timestamp3": {
-          "name": "timestamp3",
+        "created_date": {
+          "name": "created_date",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "user_id_idx": {
+          "name": "user_id_idx",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
