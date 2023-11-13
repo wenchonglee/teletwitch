@@ -12,3 +12,9 @@ html {
 :focus-visible {
   outline: 2px solid var(--orange-6);
 }
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 50px;
+  }
+}

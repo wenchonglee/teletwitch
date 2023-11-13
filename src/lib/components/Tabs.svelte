@@ -33,6 +33,7 @@
     background-color: var(--gray-11);
     border-radius: 8px;
     padding: var(--size-4) var(--size-4);
+    width: 100%;
   }
 
   div[role="tablist"] {

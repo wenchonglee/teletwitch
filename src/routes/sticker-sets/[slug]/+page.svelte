@@ -10,6 +10,8 @@
   import EmoteGridTt from "../EmoteGridTT.svelte";
   import { selectedSticker, stickerFormat } from "../store";
 
+  import Overlay from "$lib/components/Overlay.svelte";
+  import IconTelegram from "$lib/icons/IconTelegram.svelte";
   import type { PageData } from "./$types";
 
   export let data: PageData;
@@ -47,13 +49,24 @@
 </script>
 
 <svelte:head>
-  <title>{$page.params.slug} | Teletwitch</title>
+  <title>{$page.params.slug} - Teletwitch</title>
 </svelte:head>
+
 <main>
-  <form on:submit|preventDefault={submit} class="form">
-    <a href={`https://t.me/addstickers/${$page.params.slug}_by_teletwitchsticker_bot`} target="_blank">
-      Add sticker set to your Telegram account
+  <div class="title">
+    <h2>{$page.params.slug}</h2>
+
+    <a
+      class="title-link"
+      href={`https://t.me/addstickers/${$page.params.slug}_by_teletwitchsticker_bot`}
+      target="_blank"
+    >
+      <IconTelegram />
+      Add to your Telegram account
     </a>
+  </div>
+
+  <form on:submit|preventDefault={submit} class="form">
     <div class="existing-title">Existing stickers</div>
     <div class="existing-grid">
       {#if data.format === "static"}
@@ -88,12 +101,13 @@
         <EmoteGrid7tv />
       </TabItem>
     </Tabs>
+
     <TextInput label="Associated emoji" name="emoji" placeholder="Windows + ." required />
 
     <button> Add sticker </button>
-
-    <p>{current}</p>
   </form>
+
+  <Overlay message={current} />
 </main>
 
 <style>
@@ -104,10 +118,19 @@
     transition: padding 200ms;
   }
 
-  @media (max-width: 768px) {
-    main {
-      padding-inline: var(--size-3);
-    }
+  .title {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--size-1);
+    align-items: baseline;
+    margin-bottom: var(--size-2);
+  }
+
+  .title-link {
+    display: flex;
+    gap: var(--size-2);
+    align-items: baseline;
   }
 
   .form {
@@ -136,5 +159,19 @@
     display: grid;
     grid-gap: var(--size-4);
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding-inline: var(--size-3);
+    }
+
+    button {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      border-radius: 0;
+      width: 100vw;
+    }
   }
 </style>

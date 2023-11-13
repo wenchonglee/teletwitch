@@ -23,4 +23,8 @@
   .text-input > input {
     background-color: var(--gray-11);
   }
+
+  input {
+    max-width: 400px;
+  }
 </style>

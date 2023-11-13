@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import Overlay from "$lib/components/Overlay.svelte";
   import Radio from "$lib/components/Radio.svelte";
   import TabItem from "$lib/components/TabItem.svelte";
   import Tabs from "$lib/components/Tabs.svelte";
@@ -26,7 +27,9 @@
     while (true) {
       const { value, done } = await reader.read();
       if (done) {
-        goto(`/sticker-sets/${formData.get("title")}`);
+        setTimeout(() => {
+          goto(`/sticker-sets/${formData.get("title")}`);
+        }, 2000);
         break;
       }
       current = value;
@@ -35,11 +38,14 @@
 </script>
 
 <svelte:head>
-  <title>New stickerset | Teletwitch</title>
+  <title>New stickerset - Teletwitch</title>
 </svelte:head>
+
 <main>
+  <h2>Create sticker set</h2>
+
   <form on:submit|preventDefault={submit} class="form">
-    <TextInput label="Sticker set title" name="title" placeholder="e.g. Pepe" required />
+    <TextInput label="Sticker set title" name="title" placeholder="Pepe" required />
 
     <div class="radio-container">
       <Radio name="format" label="Static" value="static" bind:selected={$stickerFormat}>
@@ -50,6 +56,7 @@
       </Radio>
     </div>
 
+    <TextInput label="Associated emoji" name="emoji" placeholder="Windows + ." required />
     <Tabs
       defaultOption="teletwitch"
       options={[
@@ -65,12 +72,10 @@
       </TabItem>
     </Tabs>
 
-    <TextInput label="Associated emoji" name="emoji" placeholder="Windows + ." required />
-
     <button> Create sticker set</button>
-
-    <p>{current}</p>
   </form>
+
+  <Overlay message={current} />
 </main>
 
 <style>
@@ -79,12 +84,6 @@
     max-width: 1280px;
     margin: 0 auto;
     transition: padding 200ms;
-  }
-
-  @media (max-width: 768px) {
-    main {
-      padding-inline: var(--size-3);
-    }
   }
 
   .form {
@@ -108,5 +107,19 @@
   button:hover {
     border: 2px solid var(--orange-6);
     transform: scale(1.05);
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding-inline: var(--size-3);
+    }
+
+    button {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      border-radius: 0;
+      width: 100vw;
+    }
   }
 </style>
