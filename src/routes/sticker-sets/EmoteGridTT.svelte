@@ -1,13 +1,16 @@
 <script lang="ts">
   import { env } from "$env/dynamic/public";
+  import EmptyPrompt from "$lib/components/EmptyPrompt.svelte";
+  import LoadingSpinner from "$lib/components/LoadingSpinner.svelte";
   import { onDestroy } from "svelte";
+  import { fade } from "svelte/transition";
   import { fetchTTEmotes } from "./fetchEmotes";
   import { selectedSticker, stickerFormat } from "./store";
 
-  let promise = fetchTTEmotes("", $stickerFormat === "video");
+  let promise = fetchTTEmotes("", $stickerFormat);
 
   stickerFormat.subscribe((run) => {
-    promise = fetchTTEmotes("", $stickerFormat === "video");
+    promise = fetchTTEmotes("", $stickerFormat);
   });
 
   let timeoutId: ReturnType<typeof setTimeout>;
@@ -16,7 +19,7 @@
     clearTimeout(timeoutId);
 
     timeoutId = setTimeout(function () {
-      promise = fetchTTEmotes(currentTarget.value, $stickerFormat === "video");
+      promise = fetchTTEmotes(currentTarget.value, $stickerFormat);
     }, 300);
   };
 
@@ -27,22 +30,34 @@
 
 <div>
   <input type="text" placeholder="Search" on:input={debouncedInput} />
-  <div class="emote-grid">
+  <div>
     {#await promise}
-      <p>waiting...</p>
+      <div out:fade={{ duration: 250 }}>
+        <LoadingSpinner />
+      </div>
     {:then data}
-      {#each data as emote}
-        <button
-          type="button"
-          class="emote-container"
-          data-selected={String($selectedSticker.url === emote.file_path)}
-          on:click={() => selectedSticker.set({ url: emote.file_path ?? "", emote: emote.provider_emote ?? "" })}
-          title={emote.provider_emote}
-        >
-          <img src={`${env["PUBLIC_BUCKET_PATH"]}/${emote.file_path}`} alt={emote.provider_emote} />
-          <span class="emote-name">{emote.provider_emote}</span>
-        </button>
-      {/each}
+      <div class="emote-grid" in:fade={{ delay: 250 }}>
+        {#each data as emote}
+          <button
+            type="button"
+            class="emote-container"
+            data-selected={String($selectedSticker.url === emote.file_path)}
+            on:click={() => selectedSticker.set({ url: emote.file_path ?? "", emote: emote.provider_emote ?? "" })}
+            title={emote.provider_emote}
+          >
+            {#if $stickerFormat === "static"}
+              <img src={`${env["PUBLIC_BUCKET_PATH"]}/${emote.file_path}`} alt={emote.provider_emote} />
+            {:else}
+              <video src={`${env["PUBLIC_BUCKET_PATH"]}/${emote.file_path}`} autoplay muted loop />
+            {/if}
+            <span class="emote-name">{emote.provider_emote}</span>
+          </button>
+        {/each}
+
+        {#if data.length === 0}
+          <EmptyPrompt description="No emotes found" />
+        {/if}
+      </div>
     {:catch err}
       <p>{err}</p>
     {/await}
@@ -78,6 +93,12 @@
   }
 
   .emote-container img {
+    height: 56px;
+    width: 56px;
+    text-align: center;
+  }
+
+  .emote-container video {
     height: 56px;
     width: 56px;
     object-fit: contain;

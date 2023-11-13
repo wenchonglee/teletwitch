@@ -1,5 +1,8 @@
 <script lang="ts">
+  import EmptyPrompt from "$lib/components/EmptyPrompt.svelte";
+  import LoadingSpinner from "$lib/components/LoadingSpinner.svelte";
   import { onDestroy } from "svelte";
+  import { fade } from "svelte/transition";
   import { fetch7tvEmotes } from "./fetchEmotes";
   import { selectedSticker, stickerFormat } from "./store";
 
@@ -26,26 +29,37 @@
 
 <div>
   <input type="text" placeholder="Search" on:input={debouncedInput} />
-  <div class="emote-grid">
+  {#if $stickerFormat === "static"}
+    <span><em> * 7TV does not allow filtering by static emotes, so animated emotes are disabled instead </em></span>
+  {/if}
+  <div>
     {#await promise}
-      <p>waiting...</p>
+      <div out:fade={{ duration: 250 }}>
+        <LoadingSpinner />
+      </div>
     {:then data}
-      {#if data !== null}
-        {#each data.emotes.items as { name, host }}
-          <button
-            type="button"
-            class="emote-container"
-            data-selected={String($selectedSticker.url === `https:${host.url}/2x.webp`)}
-            on:click={() => selectedSticker.set({ url: `https:${host.url}/2x.webp`, emote: name })}
-            title={name}
-          >
-            <img src={`https:${host.url}/2x.webp`} alt={name} title={name} />
-            <span class="emote-name">{name}</span>
-          </button>
-        {/each}
-      {/if}
+      <div class="emote-grid" in:fade={{ delay: 250 }}>
+        {#if data !== null}
+          {#each data.emotes.items as { name, host, animated }}
+            <button
+              type="button"
+              class="emote-container"
+              data-selected={String($selectedSticker.url === `https:${host.url}/2x.webp`)}
+              on:click={() => selectedSticker.set({ url: `https:${host.url}/2x.webp`, emote: name })}
+              title={name}
+              disabled={$stickerFormat === "static" && animated}
+            >
+              <img src={`https:${host.url}/2x.webp`} alt={name} title={name} />
+              <span class="emote-name">{name}</span>
+            </button>
+          {/each}
+          {#if data.emotes.items.length === 0}
+            <EmptyPrompt description="No emotes found" />
+          {/if}
+        {/if}
+      </div>
     {:catch err}
-      <p>{err}</p>
+      <p>{err.message}</p>
     {/await}
   </div>
 </div>
@@ -78,6 +92,15 @@
     border: var(--border-size-2) solid var(--orange-6);
   }
 
+  .emote-container:disabled {
+    cursor: not-allowed;
+    opacity: 0.25;
+  }
+
+  .emote-container:disabled:hover {
+    background-color: var(--gray-10);
+  }
+
   .emote-container img {
     height: 56px;
     width: 56px;
@@ -98,5 +121,10 @@
   input {
     margin-block: var(--size-2);
     width: 100%;
+  }
+
+  em {
+    font-size: var(--font-size-0);
+    color: var(--gray-6);
   }
 </style>

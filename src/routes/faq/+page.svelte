@@ -36,9 +36,10 @@
     </ul>
     <div class="section-head">My stickers are out of sync</div>
     <div>
-      As above, this is a hobby project that uses free resources; there are some points of failure that Teletwitch makes
-      no effort in recovering from. (e.g. I would need to introduce a message queue for more resilience) <br /><br />
-      In most cases, you should be able to recover by manually removing stickers using
+      As above, this is a hobby project that uses free resources; there are some points of failure that Teletwitch may
+      not be able to recover from.
+      <br /><br />
+      In most cases, you should be able to fix desync issues by manually removing stickers using
       <a href="https://telegram.me/stickers">@Stickers bot</a>. You can also report issues or make requests on the
       <a href="https://github.com/wenchonglee/teletwitch/issues" target="_blank" title="Source">Github issue board</a>.
     </div>

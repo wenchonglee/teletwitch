@@ -1,5 +1,6 @@
 <script lang="ts">
   import EmoteCarousel from "$lib/components/EmoteCarousel.svelte";
+  import EmptyPrompt from "$lib/components/EmptyPrompt.svelte";
   import type { PageData } from "./$types";
   import Hero from "./Hero.svelte";
 
@@ -43,6 +44,9 @@
           </a>
         {/each}
       </div>
+      {#if data.stickerSets.length === 0}
+        <EmptyPrompt description="You have no sticker sets, start by creating one" />
+      {/if}
     </div>
   {/if}
 </main>

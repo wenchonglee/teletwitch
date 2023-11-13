@@ -1,12 +1,13 @@
 import { browser } from "$app/environment";
 import type { ObjectStore } from "$db/schema";
-import { gql, request } from "graphql-request";
+import { ClientError, gql, request } from "graphql-request";
 
 type Emote = {
   count: number;
   items: {
     id: string;
     name: string;
+    animated: boolean;
     host: {
       url: string;
       files: {
@@ -32,6 +33,7 @@ const search7tv = gql`
       items {
         id
         name
+        animated
         host {
           url
           files {
@@ -54,20 +56,29 @@ export const fetch7tvEmotes = async (query: string = "", animated: boolean = tru
       query,
       animated,
     });
+
     return data;
   } catch (err) {
+    if (err instanceof ClientError) {
+      if (err.response.errors?.some((item) => item.message.includes("Rate Limit Reached"))) {
+        throw new Error("Too many requests, try again later (limitation of 7TV)");
+      }
+    }
     return null;
   }
 };
 
-export const fetchTTEmotes = async (query: string = "", animated: boolean = true): Promise<ObjectStore[]> => {
+export const fetchTTEmotes = async (
+  query: string = "",
+  format: "video" | "static" = "static"
+): Promise<ObjectStore[]> => {
   if (!browser) {
     return [];
   }
 
   const searchParams = new URLSearchParams({
     query,
-    format: animated ? "video" : "static",
+    format,
   });
 
   const response = await fetch(`/api/stickers?${searchParams}`);

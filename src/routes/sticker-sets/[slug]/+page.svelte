@@ -5,9 +5,10 @@
   import TabItem from "$lib/components/TabItem.svelte";
   import Tabs from "$lib/components/Tabs.svelte";
   import TextInput from "$lib/components/TextInput.svelte";
+  import { onMount } from "svelte";
   import EmoteGrid7tv from "../EmoteGrid7tv.svelte";
   import EmoteGridTt from "../EmoteGridTT.svelte";
-  import { selectedSticker } from "../store";
+  import { selectedSticker, stickerFormat } from "../store";
 
   import type { PageData } from "./$types";
 
@@ -16,6 +17,10 @@
   // const os = navigator?.userAgentData?.platform
   // const tip = os === "Windows"
   let current = "";
+
+  onMount(() => {
+    stickerFormat.set(data.format);
+  });
 
   async function submit(e: SubmitEvent) {
     const formData = new FormData(e.currentTarget as HTMLFormElement);
@@ -51,9 +56,22 @@
     </a>
     <div class="existing-title">Existing stickers</div>
     <div class="existing-grid">
-      {#each data.result as { sticker }}
-        <img src={`${env["PUBLIC_BUCKET_PATH"]}/${sticker?.file_path}`} alt={sticker?.emoji} width={32} height={32} />
-      {/each}
+      {#if data.format === "static"}
+        {#each data.result as { sticker }}
+          <img src={`${env["PUBLIC_BUCKET_PATH"]}/${sticker?.file_path}`} alt={sticker?.emoji} width={32} height={32} />
+        {/each}
+      {:else}
+        {#each data.result as { sticker }}
+          <video
+            src={`${env["PUBLIC_BUCKET_PATH"]}/${sticker?.file_path}`}
+            autoplay
+            muted
+            loop
+            width={32}
+            height={32}
+          />
+        {/each}
+      {/if}
     </div>
 
     <Tabs
@@ -94,7 +112,6 @@
 
   .form {
     display: grid;
-    padding: var(--size-4);
     gap: var(--size-2);
   }
 

@@ -89,7 +89,6 @@
 
   .form {
     display: grid;
-    padding: var(--size-4);
     gap: var(--size-3);
   }
 
