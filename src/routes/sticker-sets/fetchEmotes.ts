@@ -28,7 +28,7 @@ type Gql7tvResponse = {
 
 const search7tv = gql`
   query ($query: String!, $animated: Boolean!) {
-    emotes(query: $query, page: 0, limit: 25, filter: { animated: $animated }) {
+    emotes(query: $query, page: 0, limit: 20, filter: { animated: $animated }) {
       count
       items {
         id

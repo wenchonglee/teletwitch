@@ -118,6 +118,17 @@
     padding-top: var(--size-1);
   }
 
+  @media (max-width: 768px) {
+    .emote-grid {
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    }
+
+    .emote-container img {
+      height: 32px;
+      width: 32px;
+    }
+  }
+
   input {
     margin-block: var(--size-2);
     width: 100%;

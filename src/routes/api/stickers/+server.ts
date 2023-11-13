@@ -7,7 +7,7 @@ import { db } from "../../../hooks.server.js";
 
 const QueryString = z.object({
   page: z.coerce.number().min(0).default(0),
-  size: z.coerce.number().min(0).default(25),
+  size: z.coerce.number().min(0).default(20),
   query: z.string().default(""),
   format: z.enum(["static", "video"]).optional(),
 });
