@@ -19,6 +19,7 @@
   // const os = navigator?.userAgentData?.platform
   // const tip = os === "Windows"
   let current = "";
+  let hideOverlay: () => void;
 
   onMount(() => {
     stickerFormat.set(data.format);
@@ -40,9 +41,11 @@
     while (true) {
       const { value, done } = await reader.read();
       if (done) {
+        hideOverlay();
         invalidateAll();
         break;
       }
+
       current = value;
     }
   }
@@ -107,7 +110,7 @@
     <button> Add sticker </button>
   </form>
 
-  <Overlay message={current} />
+  <Overlay message={current} bind:hideOverlay />
 </main>
 
 <style>

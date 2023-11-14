@@ -12,6 +12,7 @@
   import { selectedSticker, stickerFormat } from "../store";
 
   let current = "";
+  let hideOverlay: () => void;
 
   async function submit(e: SubmitEvent) {
     const formData = new FormData(e.currentTarget as HTMLFormElement);
@@ -26,7 +27,9 @@
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
     while (true) {
       const { value, done } = await reader.read();
+
       if (done) {
+        hideOverlay();
         setTimeout(() => {
           goto(`/sticker-sets/${formData.get("title")}`);
         }, 2000);

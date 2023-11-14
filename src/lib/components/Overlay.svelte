@@ -3,22 +3,20 @@
   import LoadingSpinner from "./LoadingSpinner.svelte";
 
   export let message: string;
-  let timeoutId: NodeJS.Timeout;
-
-  const timeout = () => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
+  export const hideOverlay = () => {
+    setTimeout(() => {
       message = "";
     }, 3_000);
   };
-
-  $: message, timeout();
 </script>
 
 <div class="overlay" data-empty={message.length === 0}>
   <div class="message-container">
     <div class="message">
-      <LoadingSpinner />
+      {#if message !== undefined}
+        <LoadingSpinner />
+      {/if}
+
       {#key message}
         <div transition:slide>
           {message}
