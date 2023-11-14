@@ -5,6 +5,7 @@
 
 app = "teletwitch"
 primary_region = "sin"
+swap_size_mb = 1024
 
 [build]
 
